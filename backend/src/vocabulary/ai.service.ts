@@ -20,7 +20,7 @@ export class AiService {
     this.genAI = new GoogleGenAI({});
   }
 
-  async generateVocabulary(): Promise<string> {
+  async generateVocabulary() {
     const prompt = `You are a vocabulary enrichment assistant. Generate 6 diverse English vocabulary items for the week.
       Categories to include (one of each):
       1. Phrasal verbs
