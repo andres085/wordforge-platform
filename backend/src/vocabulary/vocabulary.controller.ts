@@ -7,17 +7,13 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { AiService } from './ai.service';
 import { CreateVocabularyDto } from './dto/create-vocabulary.dto';
 import { UpdateVocabularyDto } from './dto/update-vocabulary.dto';
 import { VocabularyService } from './vocabulary.service';
 
 @Controller('vocabulary')
 export class VocabularyController {
-  constructor(
-    private readonly vocabularyService: VocabularyService,
-    private aiService: AiService,
-  ) {}
+  constructor(private readonly vocabularyService: VocabularyService) {}
 
   @Post()
   create(@Body() createVocabularyDto: CreateVocabularyDto) {
@@ -26,7 +22,7 @@ export class VocabularyController {
 
   @Get()
   async vocabulary() {
-    return await this.aiService.generateVocabulary();
+    return await this.vocabularyService.generateWeeklyVocabulary();
   }
 
   @Get(':id')

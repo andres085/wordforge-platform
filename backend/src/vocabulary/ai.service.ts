@@ -1,5 +1,9 @@
 import { GoogleGenAI } from '@google/genai';
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -16,32 +20,15 @@ export class AiService {
     this.genAI = new GoogleGenAI({});
   }
 
-  async generateVocabulary() {
-    const sampleQuestion = `Generate 6 English vocabulary items for language learners. Follow this exact format:
+  async generateVocabulary(): Promise<string> {
+    const prompt = `You are a vocabulary enrichment assistant. Generate 6 diverse English vocabulary items for the week.
+      Categories to include (one of each):
       1. Phrasal verbs
-      - "come across" = find by chance or seem/appear
-      - "I came across an interesting article yesterday."
-
       2. Fixed expressions
-      - "for the time being" = temporarily, for now
-      - "For the time being, I'll work from home."
-
       3. Binomials
-      - "pros and cons" = advantages and disadvantages
-      - "Let's weigh the pros and cons before deciding."
-
       4. Proverbs/sayings
-      - "Better late than never" = it's better to do something late than not at all
-      - "I finally finished the book—better late than never!"
-
       5. Discourse markers
-      - "having said that" = however, but (used to contrast with previous statement)
-      - "The movie was long. Having said that, it was entertaining."
-
       6. Register-specific vocabulary
-      - "get in touch" (neutral/informal) vs. "contact" (formal) vs. "reach out" (business informal)
-      - "Feel free to get in touch if you have questions." (friendly email)
-      - "Please contact us for further information." (formal)
 
       Requirements:
       - Use diverse, practical vocabulary
@@ -49,14 +36,43 @@ export class AiService {
       - Include realistic example sentences
       - Avoid repetition of previously used terms
       - Make examples natural and conversational
-      - Do NOT use any markdown formatting (no **, *, or _)
-      - Use plain text only`;
+
+      Return ONLY a valid JSON array with this exact structure:
+
+      [
+        {
+          "position": 1,
+          "category": "Phrasal verbs",
+          "term": "look forward to",
+          "definition": "eagerly anticipate",
+          "example": "I'm really looking forward to my vacation next month."
+        },
+        {
+          "position": 2,
+          "category": "Fixed expressions",
+          "term": "out of the blue",
+          "definition": "suddenly and unexpectedly",
+          "example": "My old friend called me out of the blue last night."
+        }
+        // ... 4 more items
+      ]
+
+      Return ONLY the JSON array, no additional text or markdown like the json tag at the start.`;
 
     const response = await this.genAI.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: sampleQuestion,
+      contents: prompt,
     });
 
-    return response.text;
+    if (!response.text)
+      throw new InternalServerErrorException('Failed to get questions from AI');
+
+    try {
+      const parsedResponse = JSON.parse(response.text as string);
+
+      return parsedResponse;
+    } catch (error) {
+      throw new BadRequestException('Failed to parse response from AI service');
+    }
   }
 }
