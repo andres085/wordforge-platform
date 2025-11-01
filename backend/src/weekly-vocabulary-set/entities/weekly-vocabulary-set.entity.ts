@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { VocabularyItem } from './vocabulary-item.entity';
+import { VocabularyItem } from '../../vocabulary/entities/vocabulary-item.entity';
 
 @Entity('weekly_vocabulary_sets')
 @Index(['year', 'weekNumber'], { unique: true })

@@ -20,11 +20,6 @@ export class VocabularyController {
     return this.vocabularyService.create(createVocabularyDto);
   }
 
-  @Get()
-  async vocabulary() {
-    return await this.vocabularyService.generateWeeklyVocabulary();
-  }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.vocabularyService.findOne(+id);

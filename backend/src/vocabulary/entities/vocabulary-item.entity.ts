@@ -7,8 +7,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { WeeklyVocabularySet } from '../../weekly-vocabulary-set/entities/weekly-vocabulary-set.entity';
 import { VocabularyCategory } from '../enums/vocabulary-item-category.enum';
-import { WeeklyVocabularySet } from './vocabulary-set.entity';
 
 @Entity('vocabulary_items')
 export class VocabularyItem {
