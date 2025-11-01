@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { VocabularyItem } from './vocabulary/entities/vocabulary-item.entity';
+import { WeeklyVocabularySet } from './vocabulary/entities/vocabulary-set.entity';
 import { VocabularyModule } from './vocabulary/vocabulary.module';
 
 @Module({
@@ -19,7 +20,7 @@ import { VocabularyModule } from './vocabulary/vocabulary.module';
       username: 'user',
       password: 'user',
       database: 'wordforge',
-      entities: [VocabularyItem],
+      entities: [VocabularyItem, WeeklyVocabularySet],
       synchronize: true,
     }),
   ],

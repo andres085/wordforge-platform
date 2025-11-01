@@ -1,22 +1,57 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { VocabularyCategory } from '../enums/vocabulary-item-category.enum';
+import { WeeklyVocabularySet } from './vocabulary-set.entity';
 
-@Entity()
+@Entity('vocabulary_items')
 export class VocabularyItem {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column()
+  @Column({ type: 'int' })
   position: number;
 
-  @Column()
+  @Column({ type: 'enum', enum: VocabularyCategory })
   category: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   term: string;
 
-  @Column()
+  @Column({ type: 'text' })
   definition: string;
 
-  @Column()
+  @Column({ type: 'text' })
   example: string;
+
+  @Column({ type: 'boolean', default: false })
+  isUsed: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  usedAt: Date | null;
+
+  @Column({ type: 'int', default: 0 })
+  regenerationCount: number;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
+
+  @ManyToOne(() => WeeklyVocabularySet, (weeklySet) => weeklySet.items, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
+  @JoinColumn({ name: 'weekly_set_id' })
+  weeklySet: WeeklyVocabularySet;
+
+  @Column({ name: 'weekly_set_id' })
+  weeklySetId: string;
 }
