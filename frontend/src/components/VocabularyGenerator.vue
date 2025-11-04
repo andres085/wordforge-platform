@@ -115,13 +115,11 @@
                 </div>
 
                 <!-- Example(s) -->
-                <div v-if="item.examples.length > 0" class="space-y-3">
+                <div class="space-y-3">
                   <p
-                    v-for="(example, exIdx) in item.examples"
-                    :key="exIdx"
                     class="text-gray-700 italic pl-4 border-l-2 border-gray-300"
                   >
-                    {{ example }}
+                    {{ item.example }}
                   </p>
                 </div>
               </label>
@@ -169,64 +167,20 @@ const completionPercentage = computed(() => {
 });
 
 // Parse the vocabulary text into structured items
-const parseVocabulary = (text) => {
+const parseVocabulary = (vocabularyItems) => {
   const items = [];
-  const lines = text.split("\n");
 
-  let currentItem = null;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-
-    // Check if it's a category line (starts with number like "1. Phrasal verbs")
-    const categoryMatch = line.match(/^(\d+)\.\s*(.+)/);
-    if (categoryMatch) {
-      // Save the previous item if it exists
-      if (currentItem && currentItem.term) {
-        items.push(currentItem);
-      }
-
-      // Start a new item
-      currentItem = {
-        category: categoryMatch[2].trim(),
-        term: "",
-        definition: "",
-        examples: [],
-        checked: false,
-      };
-      continue;
-    }
-
-    // If we have a current item and the line starts with "-"
-    if (currentItem && line.startsWith("-")) {
-      const content = line.substring(1).trim(); // Remove the "-" and trim
-
-      // Check if this is a term/definition line (contains quotes and "=")
-      if (content.includes('"') && content.includes("=")) {
-        // This is the term and definition line
-        const equalIndex = content.indexOf("=");
-        currentItem.term = content.substring(0, equalIndex).trim();
-        currentItem.definition = content.substring(equalIndex + 1).trim();
-      }
-      // Check if it's a register-specific line (contains "vs.")
-      else if (content.includes('"') && content.includes("vs.")) {
-        currentItem.term = content;
-        currentItem.definition = ""; // Will be filled by the next examples
-      }
-      // Otherwise, it's an example sentence
-      else if (content) {
-        currentItem.examples.push(content);
-      }
-    }
+  for (let item of vocabularyItems) {
+    // Start a new item
+    items.push({
+      category: item.category,
+      term: item.term,
+      definition: item.definition,
+      examples: item.example,
+      checked: item.isUsed,
+    });
   }
 
-  // Don't forget to push the last item
-  if (currentItem && currentItem.term) {
-    items.push(currentItem);
-  }
-
-  console.log("Parsed items:", items); // Debug log
   return items;
 };
 
@@ -260,13 +214,13 @@ const generateVocabulary = async () => {
   error.value = "";
 
   try {
-    const response = await axios.get("http://localhost:3000/vocabulary");
+    const response = await axios.get(
+      "http://localhost:3000/weekly-vocabulary-set/latest"
+    );
 
     if (response.data) {
-      console.log("Raw response:", response.data); // Debug log
-      const parsedItems = parseVocabulary(response.data);
-      vocabularyItems.value = parsedItems;
-      generatedAt.value = new Date().toLocaleString();
+      vocabularyItems.value = response.data.items;
+      generatedAt.value = response.data.createdAt;
       saveProgress();
     } else {
       error.value = response.data.error || "Failed to generate vocabulary";
