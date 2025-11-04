@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { UpdateVocabularyDto } from './dto/update-vocabulary.dto';
 
 @Injectable()
 export class AiService {
@@ -66,6 +67,49 @@ export class AiService {
 
     if (!response.text)
       throw new InternalServerErrorException('Failed to get questions from AI');
+
+    try {
+      const parsedResponse = JSON.parse(response.text as string);
+
+      return parsedResponse;
+    } catch (error) {
+      throw new BadRequestException('Failed to parse response from AI service');
+    }
+  }
+
+  async generateVocabularyItem(updateVocabularyDto: UpdateVocabularyDto) {
+    const prompt = `You are a vocabulary enrichment assistant. Generate a new English vocabulary item to update this one:
+
+      - ${updateVocabularyDto.category}
+      - ${updateVocabularyDto.term}
+      - ${updateVocabularyDto.definition}
+
+      Requirements:
+      - It should be of the same category
+      - Use diverse, practical vocabulary
+      - Provide clear, concise definitions
+      - Include realistic example sentences
+      - Avoid repetition of the previous vocabularyItem
+      - Make examples natural and conversational
+
+      Return ONLY a valid JSON object with this exact structure:
+
+        {
+          "category": "Phrasal verbs",
+          "term": "look forward to",
+          "definition": "eagerly anticipate",
+          "example": "I'm really looking forward to my vacation next month."
+        }
+
+      Return ONLY the JSON object, no additional text or markdown like the json tag at the start.`;
+
+    const response = await this.genAI.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+    });
+
+    if (!response.text)
+      throw new InternalServerErrorException('Failed to get question from AI');
 
     try {
       const parsedResponse = JSON.parse(response.text as string);

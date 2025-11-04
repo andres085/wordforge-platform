@@ -4,7 +4,6 @@ import { getWeek, getYear } from 'date-fns';
 import { Repository } from 'typeorm';
 import { AiService } from '../vocabulary/ai.service';
 import { VocabularyItem } from '../vocabulary/entities/vocabulary-item.entity';
-import { CreateWeeklyVocabularySetDto } from './dto/create-weekly-vocabulary-set.dto';
 import { UpdateWeeklyVocabularySetDto } from './dto/update-weekly-vocabulary-set.dto';
 import { WeeklyVocabularySet } from './entities/weekly-vocabulary-set.entity';
 
@@ -58,10 +57,6 @@ export class WeeklyVocabularySetService {
         year,
       },
     });
-  }
-
-  create(createWeeklyVocabularySetDto: CreateWeeklyVocabularySetDto) {
-    return 'This action adds a new weeklyVocabularySet';
   }
 
   findAll() {

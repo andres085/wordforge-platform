@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
-import { CreateWeeklyVocabularySetDto } from './dto/create-weekly-vocabulary-set.dto';
+import { Body, Controller, Delete, Get, Param, Patch } from '@nestjs/common';
 import { UpdateWeeklyVocabularySetDto } from './dto/update-weekly-vocabulary-set.dto';
 import { WeeklyVocabularySetService } from './weekly-vocabulary-set.service';
 
@@ -25,11 +16,6 @@ export class WeeklyVocabularySetController {
   @Get()
   weeklyVocabularySet() {
     return this.weeklyVocabularySetService.generateWeeklyVocabulary();
-  }
-
-  @Post()
-  create(@Body() createWeeklyVocabularySetDto: CreateWeeklyVocabularySetDto) {
-    return this.weeklyVocabularySetService.create(createWeeklyVocabularySetDto);
   }
 
   @Get()
