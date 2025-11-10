@@ -1,14 +1,8 @@
-<script setup>
-import "./assets/main.css";
-import VocabularyGenerator from "./components/VocabularyGenerator.vue";
-</script>
-
 <template>
-  <VocabularyGenerator />
+  <router-view />
 </template>
 
 <style>
-/* Reset some default styles if needed */
 * {
   margin: 0;
   padding: 0;

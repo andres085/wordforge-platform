@@ -218,6 +218,7 @@ const generateVocabulary = async () => {
       "http://localhost:3000/weekly-vocabulary-set/latest"
     );
 
+    console.log({ data: response.data });
     if (response.data) {
       vocabularyItems.value = response.data.items;
       generatedAt.value = response.data.createdAt;

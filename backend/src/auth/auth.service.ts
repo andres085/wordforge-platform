@@ -1,5 +1,6 @@
 // src/auth/auth.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,6 +12,7 @@ export class AuthService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async validateGoogleUser(googleUser: any) {
@@ -35,8 +37,19 @@ export class AuthService {
 
   async login(user: User) {
     const payload = { email: user.email, sub: user.id };
+
+    const access_token = this.jwtService.sign(payload, {
+      expiresIn: '15m',
+    });
+
+    const refresh_token = this.jwtService.sign(payload, {
+      expiresIn: '7d',
+      secret: this.configService.get('JWT_REFRESH_SECRET'),
+    });
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token,
+      refresh_token,
       user: {
         id: user.id,
         email: user.email,
@@ -44,5 +57,22 @@ export class AuthService {
         avatar: user.avatar,
       },
     };
+  }
+
+  async refreshAccessToken(refresh_token: string) {
+    try {
+      const payload = this.jwtService.verify(refresh_token, {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+      });
+
+      const access_token = this.jwtService.sign(
+        { email: payload.email, sub: payload.sub },
+        { expiresIn: '15m' },
+      );
+
+      return { access_token };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
 }
