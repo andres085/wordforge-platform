@@ -14,22 +14,22 @@ const handleGoogleRegister = () => {
 
 <template>
   <div
-    class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 py-12"
+    class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4 py-12"
   >
-    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+    <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
       <!-- Logo/Title -->
-      <div class="text-center mb-8">
-        <div class="flex items-center justify-center gap-2 mb-4">
-          <span class="text-4xl">🔥</span>
-          <h1 class="text-3xl font-bold text-gray-900">WordForge</h1>
+      <div class="text-center mb-10">
+        <div class="flex items-center justify-center gap-3 mb-4">
+          <span class="text-5xl">🔥</span>
+          <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">WordForge</h1>
         </div>
-        <p class="text-gray-600">Create your account to start learning</p>
+        <p class="text-gray-600 text-lg">Create your account to start learning</p>
       </div>
 
       <!-- Error Message -->
       <div
         v-if="errors.general"
-        class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg"
+        class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
       >
         <p class="text-sm text-red-600">{{ errors.general }}</p>
       </div>
@@ -37,7 +37,7 @@ const handleGoogleRegister = () => {
       <!-- Google Sign Up Button -->
       <button
         @click="handleGoogleRegister"
-        class="w-full bg-white border-2 border-gray-200 text-gray-700 px-6 py-4 rounded-lg hover:border-blue-500 hover:shadow-md transition-all flex items-center justify-center gap-3 font-medium mb-6"
+        class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3 font-bold mb-6"
       >
         <svg class="w-6 h-6" viewBox="0 0 24 24">
           <path
@@ -60,9 +60,22 @@ const handleGoogleRegister = () => {
         Sign up with Google
       </button>
 
+      <!-- Login Link -->
+      <div class="text-center mb-6">
+        <p class="text-gray-600">
+          Already have an account?
+          <RouterLink
+            to="/login"
+            class="text-indigo-600 hover:text-indigo-700 font-semibold"
+          >
+            Sign in
+          </RouterLink>
+        </p>
+      </div>
+
       <!-- Back to Home -->
-      <div class="text-center mt-4">
-        <RouterLink to="/" class="text-sm text-gray-500 hover:text-gray-700">
+      <div class="text-center">
+        <RouterLink to="/" class="text-sm text-gray-500 hover:text-gray-700 transition-colors">
           ← Back to home
         </RouterLink>
       </div>

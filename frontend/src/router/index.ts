@@ -36,8 +36,26 @@ const router = createRouter({
 });
 
 // Navigation guard
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
+
+  // Wait for auth initialization if it's still loading
+  if (authStore.isLoading) {
+    // Wait a bit for initialization to complete
+    await new Promise((resolve) => {
+      const checkLoading = setInterval(() => {
+        if (!authStore.isLoading) {
+          clearInterval(checkLoading);
+          resolve(true);
+        }
+      }, 50);
+      // Timeout after 5 seconds
+      setTimeout(() => {
+        clearInterval(checkLoading);
+        resolve(false);
+      }, 5000);
+    });
+  }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next("/login");

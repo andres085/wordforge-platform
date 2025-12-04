@@ -11,22 +11,22 @@ const handleGoogleLogin = () => {
 
 <template>
   <div
-    class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4"
+    class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4"
   >
-    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+    <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
       <!-- Logo/Title -->
-      <div class="text-center mb-8">
-        <div class="flex items-center justify-center gap-2 mb-4">
-          <span class="text-4xl">🔥</span>
-          <h1 class="text-3xl font-bold text-gray-900">WordForge</h1>
+      <div class="text-center mb-10">
+        <div class="flex items-center justify-center gap-3 mb-4">
+          <span class="text-5xl">🔥</span>
+          <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">WordForge</h1>
         </div>
-        <p class="text-gray-600">Sign in to continue learning</p>
+        <p class="text-gray-600 text-lg">Sign in to continue learning</p>
       </div>
 
       <!-- Google Sign In Button -->
       <button
         @click="handleGoogleLogin"
-        class="w-full bg-white border-2 border-gray-200 text-gray-700 px-6 py-4 rounded-lg hover:border-blue-500 hover:shadow-md transition-all flex items-center justify-center gap-3 font-medium"
+        class="w-full bg-white border-2 border-gray-200 text-gray-700 px-8 py-4 rounded-lg hover:border-indigo-400 hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3 font-semibold"
       >
         <svg class="w-6 h-6" viewBox="0 0 24 24">
           <path
@@ -65,7 +65,7 @@ const handleGoogleLogin = () => {
           Don't have an account?
           <RouterLink
             to="/register"
-            class="text-blue-600 hover:text-blue-700 font-medium"
+            class="text-indigo-600 hover:text-indigo-700 font-semibold"
           >
             Sign up
           </RouterLink>
@@ -73,8 +73,8 @@ const handleGoogleLogin = () => {
       </div>
 
       <!-- Back to Home -->
-      <div class="text-center mt-6">
-        <RouterLink to="/" class="text-sm text-gray-500 hover:text-gray-700">
+      <div class="text-center mt-8">
+        <RouterLink to="/" class="text-sm text-gray-500 hover:text-gray-700 transition-colors">
           ← Back to home
         </RouterLink>
       </div>

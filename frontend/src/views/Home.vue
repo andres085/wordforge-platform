@@ -7,41 +7,44 @@ const authStore = useAuthStore();
 
 <template>
   <div
-    class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50"
+    class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50"
   >
     <!-- Navigation -->
-    <nav class="container mx-auto px-4 py-6">
+    <nav class="w-full px-8 py-5 bg-white shadow-sm sticky top-0 z-50">
       <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
           <span class="text-3xl">🔥</span>
-          <span class="text-2xl font-bold text-gray-900">WordForge</span>
+          <span
+            class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"
+            >WordForge</span
+          >
         </div>
 
-        <div v-if="!authStore.isAuthenticated" class="flex items-center gap-4">
+        <div v-if="!authStore.isAuthenticated" class="flex items-center gap-3">
           <RouterLink
             to="/login"
-            class="text-gray-700 hover:text-gray-900 font-medium"
+            class="px-12 py-3 text-gray-700 font-medium rounded-md hover:bg-gray-100 transition-all duration-200"
           >
             Sign In
           </RouterLink>
           <RouterLink
             to="/register"
-            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-medium"
+            class="px-12 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-semibold rounded-md shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
           >
             Get Started
           </RouterLink>
         </div>
 
-        <div v-else class="flex items-center gap-4">
+        <div v-else class="flex items-center gap-3">
           <RouterLink
             to="/vocabulary"
-            class="text-gray-700 hover:text-gray-900 font-medium"
+            class="px-5 py-2.5 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-all duration-200"
           >
             My Vocabulary
           </RouterLink>
           <button
             @click="authStore.logout()"
-            class="text-red-600 hover:text-red-700 font-medium"
+            class="px-5 py-2.5 text-red-600 font-medium rounded-lg hover:bg-red-50 transition-all duration-200"
           >
             Logout
           </button>
@@ -50,59 +53,71 @@ const authStore = useAuthStore();
     </nav>
 
     <!-- Hero Section -->
-    <div class="container mx-auto px-4 py-20">
-      <div class="max-w-4xl mx-auto text-center">
-        <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+    <div
+      class="w-full px-6 py-20 flex items-center justify-center min-h-[calc(100vh-80px)]"
+    >
+      <div class="max-w-5xl w-full mx-auto">
+        <h1
+          class="text-6xl md:text-7xl font-extrabold text-gray-900 mb-6 leading-tight text-center"
+        >
           Forge Your English Vocabulary
         </h1>
-        <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+        <p
+          class="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed text-center"
+        >
           Master phrases, idioms, collocations, and more. Get 6 curated
           vocabulary items every week to level up your English.
         </p>
 
         <div
-          class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
+          class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-24"
         >
           <RouterLink
             to="/register"
-            class="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
+            class="w-full sm:w-auto px-20 py-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg rounded-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 transform"
           >
             Start Learning Free
           </RouterLink>
           <RouterLink
             to="/login"
-            class="bg-white text-gray-700 px-8 py-4 rounded-lg hover:bg-gray-50 font-semibold text-lg border-2 border-gray-200"
+            class="w-full sm:w-auto px-20 py-5 bg-white text-gray-800 font-semibold text-lg rounded-lg shadow-md hover:shadow-lg border-2 border-gray-200 hover:border-indigo-300 transition-all duration-300"
           >
             Sign In
           </RouterLink>
         </div>
 
         <!-- Features -->
-        <div class="grid md:grid-cols-3 gap-8 mt-20">
-          <div class="bg-white p-6 rounded-xl shadow-md">
-            <div class="text-4xl mb-4">📚</div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Weekly Sets</h3>
-            <p class="text-gray-600">
+        <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div
+            class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
+          >
+            <div class="text-5xl mb-5">📚</div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">Weekly Sets</h3>
+            <p class="text-gray-600 leading-relaxed text-base p-5">
               Get 6 new vocabulary items every Monday. Phrases, idioms,
               collocations, and more.
             </p>
           </div>
 
-          <div class="bg-white p-6 rounded-xl shadow-md">
-            <div class="text-4xl mb-4">✅</div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Track Progress</h3>
-            <p class="text-gray-600">
+          <div
+            class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
+          >
+            <div class="text-5xl mb-5">✅</div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">Track Progress</h3>
+            <p class="text-gray-600 leading-relaxed text-base p-5">
               Mark items as used in real conversations. Build streaks and see
               your growth.
             </p>
           </div>
 
-          <div class="bg-white p-6 rounded-xl shadow-md">
-            <div class="text-4xl mb-4">🎯</div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">
+          <div
+            class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
+          >
+            <div class="text-5xl mb-5">🎯</div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">
               Practical Learning
             </h3>
-            <p class="text-gray-600">
+            <p class="text-gray-600 leading-relaxed text-base p-5">
               Every item includes definitions and example sentences for
               real-world usage.
             </p>

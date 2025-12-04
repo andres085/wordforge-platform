@@ -1,10 +1,21 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 p-8">
+  <div
+    class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-8"
+  >
     <div class="max-w-5xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-12">
-        <h1 class="text-5xl font-bold text-gray-800 mb-2">🔥 WordForge</h1>
-        <p class="text-gray-600">Forge your vocabulary, one week at a time</p>
+        <div class="flex items-center justify-center gap-3 mb-4">
+          <span class="text-6xl">🔥</span>
+          <h1
+            class="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"
+          >
+            WordForge
+          </h1>
+        </div>
+        <p class="text-gray-600 text-lg">
+          Forge your vocabulary, one week at a time
+        </p>
       </div>
 
       <!-- Generate Button -->
@@ -12,7 +23,7 @@
         <button
           @click="generateVocabulary"
           :disabled="loading"
-          class="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+          class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-xl disabled:bg-gray-400 text-white font-bold py-4 px-12 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
         >
           <span v-if="!loading">✨ Generate Vocabulary</span>
           <span v-else>🔄 Generating...</span>
@@ -41,12 +52,14 @@
             </p>
           </div>
           <div class="flex items-center gap-4">
-            <div class="text-3xl font-bold text-orange-500">
+            <div
+              class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"
+            >
               {{ completionPercentage }}%
             </div>
             <div class="w-32 h-3 bg-gray-200 rounded-full overflow-hidden">
               <div
-                class="h-full bg-gradient-to-r from-orange-400 to-red-500 transition-all duration-500"
+                class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 transition-all duration-500"
                 :style="{ width: `${completionPercentage}%` }"
               ></div>
             </div>
@@ -67,9 +80,9 @@
         <div
           v-for="(item, index) in vocabularyItems"
           :key="index"
-          class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 p-6 border-l-4"
+          class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-l-4"
           :class="[
-            item.checked ? 'border-green-500 bg-green-50' : 'border-orange-400',
+            item.checked ? 'border-green-500 bg-green-50' : 'border-indigo-500',
           ]"
         >
           <div class="flex items-start gap-4">
@@ -80,7 +93,7 @@
                 :id="`item-${index}`"
                 v-model="item.checked"
                 @change="saveProgress"
-                class="w-6 h-6 text-orange-500 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2 cursor-pointer"
+                class="w-6 h-6 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer"
               />
             </div>
 
@@ -94,7 +107,7 @@
                 <!-- Category -->
                 <div class="flex items-center gap-2 mb-4">
                   <span
-                    class="inline-block px-3 py-1 text-sm font-semibold text-orange-700 bg-orange-100 rounded-full"
+                    class="inline-block px-3 py-1 text-sm font-semibold text-indigo-700 bg-indigo-100 rounded-full"
                   >
                     {{ item.category }}
                   </span>
@@ -146,8 +159,8 @@
 </template>
 
 <script setup>
-import axios from "axios";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { api } from "../stores/auth";
 
 const vocabularyItems = ref([]);
 const loading = ref(false);
@@ -214,7 +227,7 @@ const generateVocabulary = async () => {
   error.value = "";
 
   try {
-    const response = await axios.get(
+    const response = await api.get(
       "http://localhost:3000/weekly-vocabulary-set/latest"
     );
 
@@ -227,6 +240,7 @@ const generateVocabulary = async () => {
       error.value = response.data.error || "Failed to generate vocabulary";
     }
   } catch (err) {
+    console.error(err);
     error.value =
       err.response?.data?.message ||
       err.message ||
@@ -236,8 +250,16 @@ const generateVocabulary = async () => {
   }
 };
 
-// Load progress on component mount
+// Load progress on mount
 loadProgress();
+
+// Auto-fetch vocabulary from backend when component is mounted
+onMounted(() => {
+  // If no cached data, fetch from backend
+  if (vocabularyItems.value.length === 0) {
+    generateVocabulary();
+  }
+});
 </script>
 
 <style scoped>
@@ -247,7 +269,7 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:checked {
-  background-color: #f97316;
-  border-color: #f97316;
+  background-color: #4f46e5;
+  border-color: #4f46e5;
 }
 </style>
