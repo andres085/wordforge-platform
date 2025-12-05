@@ -3,10 +3,12 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from '../../user/entities/user.entity';
 import { VocabularyItem } from '../../vocabulary/entities/vocabulary-item.entity';
 
 @Entity('weekly_vocabulary_sets')
@@ -35,4 +37,9 @@ export class WeeklyVocabularySet {
     eager: true,
   })
   items: VocabularyItem[];
+
+  @ManyToOne(() => User, (user) => user.weeklySets, {
+    cascade: true,
+  })
+  user: User;
 }
