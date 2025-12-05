@@ -15,6 +15,9 @@ export class GlobalVocabularyItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ type: 'int' })
+  position: number;
+
   @Column({ type: 'enum', enum: VocabularyCategory })
   category: string;
 

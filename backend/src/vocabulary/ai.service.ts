@@ -3,13 +3,16 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UpdateGlobalVocabularyDto } from './dto/global/update-global-vocabulary.dto';
+import { GlobalVocabularyItem } from './entities';
 
 @Injectable()
 export class AiService {
   private genAI: GoogleGenAI;
+  private readonly logger: Logger;
 
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
@@ -19,6 +22,7 @@ export class AiService {
     }
 
     this.genAI = new GoogleGenAI({});
+    this.logger = new Logger();
   }
 
   async generateVocabulary() {
@@ -58,7 +62,7 @@ export class AiService {
         // ... 4 more items
       ]
 
-      Return ONLY the JSON array, no additional text or markdown like the json tag at the start.`;
+      Return ONLY the JSON array, no additional text or markdown like the json tag at the start. IMPORTANT: every item should have his postion number in it going from 1 to 6 based on the list.`;
 
     const response = await this.genAI.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -75,6 +79,86 @@ export class AiService {
     } catch (error) {
       throw new BadRequestException('Failed to parse response from AI service');
     }
+  }
+
+  private validateVocabularyItemsCategory(
+    vocabularyItems: GlobalVocabularyItem[],
+  ): boolean {
+    if (!Array.isArray(vocabularyItems)) {
+      this.logger.debug('Validation failed: not an array');
+      return false;
+    }
+
+    if (vocabularyItems.length !== 6) {
+      this.logger.debug(
+        `Validation failed: expected 6 items, got ${vocabularyItems.length}`,
+      );
+      return false;
+    }
+
+    const expectedCategories = [
+      'Phrasal verbs',
+      'Fixed expressions',
+      'Binomials',
+      'Proverbs',
+      'Discourse markers',
+      'Register-specific vocabulary',
+    ];
+
+    const uniqueCategories = new Set();
+    for (let vocabularyItem of vocabularyItems) {
+      if (!expectedCategories.includes(vocabularyItem.category)) {
+        this.logger.debug(
+          `Validation failed: unknown category "${vocabularyItem.category}"`,
+        );
+        return false;
+      }
+      uniqueCategories.add(vocabularyItem.category);
+    }
+
+    if (uniqueCategories.size !== 6) {
+      const missing = expectedCategories.filter(
+        (cat) => !uniqueCategories.has(cat),
+      );
+      this.logger.debug(
+        `Validation failed: missing or duplicate categories. Got: ${Array.from(uniqueCategories)}`,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  private reorderAndSanitize(
+    items: GlobalVocabularyItem[],
+  ): GlobalVocabularyItem[] {
+    const expectedOrder = [
+      'Phrasal verbs',
+      'Fixed expressions',
+      'Binomials',
+      'Proverbs',
+      'Discourse markers',
+      'Register-specific vocabulary',
+    ];
+
+    const itemsByCategory = new Map<string, GlobalVocabularyItem>();
+    for (let item of items) {
+      itemsByCategory.set(item.category, item);
+    }
+
+    const reorderedItems: GlobalVocabularyItem[] = [];
+
+    for (let i = 0; i < expectedOrder.length; i++) {
+      const category = expectedOrder[i];
+      const item = itemsByCategory.get(category) as GlobalVocabularyItem;
+
+      reorderedItems.push({
+        ...item,
+        position: i + 1,
+      });
+    }
+
+    return reorderedItems;
   }
 
   async generateVocabularyItem(updateVocabularyDto: UpdateGlobalVocabularyDto) {
