@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { WeeklyVocabularySetController } from './weekly-vocabulary-set.controller';
-import { WeeklyVocabularySetService } from './weekly-vocabulary-set.service';
+import { WeeklyVocabularySetController } from './global-weekly-vocabulary-set.controller';
+import { WeeklyVocabularySetService } from './global-weekly-vocabulary-set.service';
 
 describe('WeeklyVocabularySetController', () => {
   let controller: WeeklyVocabularySetController;
@@ -11,7 +11,9 @@ describe('WeeklyVocabularySetController', () => {
       providers: [WeeklyVocabularySetService],
     }).compile();
 
-    controller = module.get<WeeklyVocabularySetController>(WeeklyVocabularySetController);
+    controller = module.get<WeeklyVocabularySetController>(
+      WeeklyVocabularySetController,
+    );
   });
 
   it('should be defined', () => {

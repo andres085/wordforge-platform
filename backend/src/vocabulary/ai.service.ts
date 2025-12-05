@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UpdateVocabularyDto } from './dto/update-vocabulary.dto';
+import { UpdateGlobalVocabularyDto } from './dto/global/update-global-vocabulary.dto';
 
 @Injectable()
 export class AiService {
@@ -77,7 +77,7 @@ export class AiService {
     }
   }
 
-  async generateVocabularyItem(updateVocabularyDto: UpdateVocabularyDto) {
+  async generateVocabularyItem(updateVocabularyDto: UpdateGlobalVocabularyDto) {
     const prompt = `You are a vocabulary enrichment assistant. Generate a new English vocabulary item to update this one:
 
       - ${updateVocabularyDto.category}

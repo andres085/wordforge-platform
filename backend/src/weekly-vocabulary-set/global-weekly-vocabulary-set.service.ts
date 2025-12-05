@@ -3,18 +3,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { getWeek, getYear } from 'date-fns';
 import { Repository } from 'typeorm';
 import { AiService } from '../vocabulary/ai.service';
-import { VocabularyItem } from '../vocabulary/entities/vocabulary-item.entity';
-import { UpdateWeeklyVocabularySetDto } from './dto/update-weekly-vocabulary-set.dto';
-import { WeeklyVocabularySet } from './entities/weekly-vocabulary-set.entity';
+import { GlobalVocabularyItem } from '../vocabulary/entities/global/global-vocabulary-item.entity';
+import { UpdateGlobalWeeklyVocabularySetDto } from './dto/global/update-global-weekly-vocabulary-set.dto';
+import { GlobalWeeklyVocabularySet } from './entities';
 
 @Injectable()
-export class WeeklyVocabularySetService {
+export class GlobalWeeklyVocabularySetService {
   constructor(
     private aiService: AiService,
-    @InjectRepository(VocabularyItem)
-    private vocabularyItemRepository: Repository<VocabularyItem>,
-    @InjectRepository(WeeklyVocabularySet)
-    private weeklyVocabularyRepository: Repository<WeeklyVocabularySet>,
+    @InjectRepository(GlobalVocabularyItem)
+    private globalVocabularyItemRepository: Repository<GlobalVocabularyItem>,
+    @InjectRepository(GlobalWeeklyVocabularySet)
+    private globalWeeklyVocabularyRepository: Repository<GlobalWeeklyVocabularySet>,
   ) {}
 
   async generateWeeklyVocabulary() {
@@ -24,21 +24,21 @@ export class WeeklyVocabularySetService {
     const weekNumber = getWeek(now);
     const year = getYear(now);
 
-    const createdWeeklyVocabulary = await this.weeklyVocabularyRepository.save({
-      weekNumber,
-      year,
-    });
+    const createdWeeklyVocabulary =
+      await this.globalWeeklyVocabularyRepository.save({
+        weekNumber,
+        year,
+      });
 
     const vocabularyItemsToCreate = vocabularyResponse.map(
-      (vocabularyItem: VocabularyItem) => ({
+      (vocabularyItem: GlobalVocabularyItem) => ({
         ...vocabularyItem,
         weeklySetId: createdWeeklyVocabulary.id,
       }),
     );
 
-    const createdVocabularyItems = await this.vocabularyItemRepository.save(
-      vocabularyItemsToCreate,
-    );
+    const createdVocabularyItems =
+      await this.globalVocabularyItemRepository.save(vocabularyItemsToCreate);
 
     return {
       weeklySetId: createdWeeklyVocabulary.id,
@@ -51,7 +51,7 @@ export class WeeklyVocabularySetService {
     const weekNumber = getWeek(now);
     const year = getYear(now);
 
-    return await this.weeklyVocabularyRepository.findOne({
+    return await this.globalWeeklyVocabularyRepository.findOne({
       where: {
         weekNumber,
         year,
@@ -69,7 +69,7 @@ export class WeeklyVocabularySetService {
 
   update(
     id: number,
-    updateWeeklyVocabularySetDto: UpdateWeeklyVocabularySetDto,
+    updateWeeklyVocabularySetDto: UpdateGlobalWeeklyVocabularySetDto,
   ) {
     return `This action updates a #${id} weeklyVocabularySet`;
   }

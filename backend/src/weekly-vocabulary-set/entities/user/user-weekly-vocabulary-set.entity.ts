@@ -8,12 +8,18 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { VocabularyItem } from '../../vocabulary/entities/vocabulary-item.entity';
+import { User } from '../../../user/entities/user.entity';
+import { UserVocabularyItem } from '../../../vocabulary/entities';
 
-@Entity('weekly_vocabulary_sets')
+export enum UserWeeklyVocabularySetStatus {
+  ACTIVE = 'ACTIVE',
+  INCOMPLETE = 'INCOMPLETE',
+  COMPLETE = 'COMPLETE',
+}
+
+@Entity('user_weekly_vocabulary_sets')
 @Index(['year', 'weekNumber'], { unique: true })
-export class WeeklyVocabularySet {
+export class UserWeeklyVocabularySet {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -26,17 +32,27 @@ export class WeeklyVocabularySet {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
+  @Column({
+    type: 'enum',
+    enum: UserWeeklyVocabularySetStatus,
+    default: UserWeeklyVocabularySetStatus.ACTIVE,
+  })
+  status: UserWeeklyVocabularySetStatus;
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @OneToMany(() => VocabularyItem, (item) => item.weeklySet, {
+  @Column({ type: 'timestamp' })
+  completedAt: Date;
+
+  @OneToMany(() => UserVocabularyItem, (item) => item.weeklySet, {
     cascade: true,
     eager: true,
   })
-  items: VocabularyItem[];
+  items: UserVocabularyItem[];
 
   @ManyToOne(() => User, (user) => user.weeklySets, {
     cascade: true,

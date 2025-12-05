@@ -1,4 +1,4 @@
-export class CreateVocabularyDto {
+export class CreateUserVocabularyDto {
   category: string;
   term: string;
   definition: string;

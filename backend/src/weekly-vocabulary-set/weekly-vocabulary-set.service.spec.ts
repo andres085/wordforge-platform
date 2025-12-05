@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { WeeklyVocabularySetService } from './weekly-vocabulary-set.service';
+import { WeeklyVocabularySetService } from './global-weekly-vocabulary-set.service';
 
 describe('WeeklyVocabularySetService', () => {
   let service: WeeklyVocabularySetService;
@@ -9,7 +9,9 @@ describe('WeeklyVocabularySetService', () => {
       providers: [WeeklyVocabularySetService],
     }).compile();
 
-    service = module.get<WeeklyVocabularySetService>(WeeklyVocabularySetService);
+    service = module.get<WeeklyVocabularySetService>(
+      WeeklyVocabularySetService,
+    );
   });
 
   it('should be defined', () => {
