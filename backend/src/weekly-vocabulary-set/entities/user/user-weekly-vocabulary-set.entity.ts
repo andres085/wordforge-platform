@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -45,8 +46,8 @@ export class UserWeeklyVocabularySet {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @Column({ type: 'timestamp' })
-  completedAt: Date;
+  @Column({ type: 'timestamp', default: null })
+  completedAt: Date | null;
 
   @OneToMany(() => UserVocabularyItem, (item) => item.weeklySet, {
     cascade: true,
@@ -54,8 +55,10 @@ export class UserWeeklyVocabularySet {
   })
   items: UserVocabularyItem[];
 
-  @ManyToOne(() => User, (user) => user.weeklySets, {
-    cascade: true,
-  })
+  @Column({ type: 'uuid', nullable: false })
+  userId: string;
+
+  @ManyToOne(() => User, (user) => user.weeklySets)
+  @JoinColumn({ name: 'userId' })
   user: User;
 }

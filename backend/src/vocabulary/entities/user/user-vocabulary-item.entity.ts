@@ -36,7 +36,7 @@ export class UserVocabularyItem {
   @Column({ type: 'boolean', default: false })
   wasExchanged: boolean;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamp', nullable: true, default: null })
   completedAt: Date | null;
 
   @Column({ type: 'int', default: 0 })

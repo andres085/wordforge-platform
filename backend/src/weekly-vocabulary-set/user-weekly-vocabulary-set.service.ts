@@ -1,22 +1,29 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { getWeek, getYear } from 'date-fns';
-import { Repository } from 'typeorm';
-import { AiService } from '../vocabulary/ai.service';
-import { GlobalVocabularyItem } from '../vocabulary/entities/global/global-vocabulary-item.entity';
+import { DataSource, Repository } from 'typeorm';
+import {
+  GlobalVocabularyItem,
+  UserVocabularyItem,
+} from '../vocabulary/entities';
 import { UpdateGlobalWeeklyVocabularySetDto } from './dto/global/update-global-weekly-vocabulary-set.dto';
 import { GlobalWeeklyVocabularySet, UserWeeklyVocabularySet } from './entities';
 
 @Injectable()
 export class UserWeeklyVocabularySetService {
   constructor(
-    private aiService: AiService,
-    @InjectRepository(GlobalVocabularyItem)
-    private globalVocabularyItemRepository: Repository<GlobalVocabularyItem>,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
     @InjectRepository(GlobalWeeklyVocabularySet)
     private globalWeeklyVocabularyRepository: Repository<GlobalWeeklyVocabularySet>,
-    @InjectRepository(GlobalWeeklyVocabularySet)
+    @InjectRepository(UserWeeklyVocabularySet)
     private userWeeklyVocabularyRepository: Repository<UserWeeklyVocabularySet>,
+    @InjectRepository(UserVocabularyItem)
+    private userVocabularyItemRepository: Repository<UserVocabularyItem>,
   ) {}
 
   async findLatestGlobalSet() {
@@ -33,16 +40,54 @@ export class UserWeeklyVocabularySetService {
   }
 
   async create(userId: string) {
-    try {
-      const latestGlobalSet = await this.findLatestGlobalSet();
+    return this.dataSource.manager.transaction(
+      async (transactionalEntityManager) => {
+        const hasLatest = await this.findLatestUserSet();
+        if (hasLatest)
+          throw new BadRequestException(
+            "Can't generate a new set without completing the current one",
+          );
 
-      //Create new Set for User attach to User
-      //If success, create the list of items
+        const latestGlobalSet = await this.findLatestGlobalSet();
 
-      console.log(latestGlobalSet);
-    } catch (error) {
-      console.error(error);
-    }
+        if (!latestGlobalSet)
+          throw new NotFoundException('No active global set found');
+
+        const createdUserSet: UserWeeklyVocabularySet =
+          await transactionalEntityManager.save(UserWeeklyVocabularySet, {
+            ...latestGlobalSet,
+            userId,
+          });
+
+        const vocabularyItemsToCreate: UserVocabularyItem[] =
+          latestGlobalSet?.items.map(
+            (vocabularyItem: GlobalVocabularyItem) => ({
+              ...vocabularyItem,
+              weeklySetId: createdUserSet.id,
+            }),
+          ) as UserVocabularyItem[];
+
+        await transactionalEntityManager.save(
+          UserVocabularyItem,
+          vocabularyItemsToCreate,
+        );
+
+        return createdUserSet;
+      },
+    );
+  }
+
+  async findLatestUserSet() {
+    const now = new Date();
+    const weekNumber = getWeek(now);
+    const year = getYear(now);
+
+    return await this.userWeeklyVocabularyRepository.findOne({
+      where: {
+        weekNumber,
+        year,
+      },
+    });
   }
 
   findAll() {
