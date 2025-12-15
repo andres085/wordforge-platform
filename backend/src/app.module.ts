@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { User } from './user/entities/user.entity';
@@ -23,21 +23,25 @@ import { WeeklyVocabularySetModule } from './weekly-vocabulary-set/weekly-vocabu
       envFilePath: '.env',
       cache: true,
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'user',
-      password: 'user',
-      database: 'wordforge',
-      entities: [
-        GlobalVocabularyItem,
-        UserVocabularyItem,
-        GlobalWeeklyVocabularySet,
-        UserWeeklyVocabularySet,
-        User,
-      ],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('DB_HOST', 'localhost'),
+        port: configService.get('DB_PORT', 5432),
+        username: configService.get('DB_USER', 'user'),
+        password: configService.get('DB_PASSWORD', 'user'),
+        database: configService.get('DB_NAME', 'wordforge'),
+        entities: [
+          GlobalVocabularyItem,
+          UserVocabularyItem,
+          GlobalWeeklyVocabularySet,
+          UserWeeklyVocabularySet,
+          User,
+        ],
+        synchronize: configService.get('DB_SYNC', true),
+      }),
     }),
     AuthModule,
   ],
