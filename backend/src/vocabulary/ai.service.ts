@@ -75,7 +75,13 @@ export class AiService {
     try {
       const parsedResponse = JSON.parse(response.text as string);
 
-      return parsedResponse;
+      const isValid = this.validateVocabularyItemsCategory(parsedResponse);
+      if (!isValid)
+        throw new InternalServerErrorException(
+          'Vocabulary Items list is not valid',
+        );
+
+      return this.reorderAndSanitize(parsedResponse);
     } catch (error) {
       throw new BadRequestException('Failed to parse response from AI service');
     }
@@ -100,7 +106,7 @@ export class AiService {
       'Phrasal verbs',
       'Fixed expressions',
       'Binomials',
-      'Proverbs',
+      'Proverbs/sayings',
       'Discourse markers',
       'Register-specific vocabulary',
     ];
@@ -136,7 +142,7 @@ export class AiService {
       'Phrasal verbs',
       'Fixed expressions',
       'Binomials',
-      'Proverbs',
+      'Proverbs/sayings',
       'Discourse markers',
       'Register-specific vocabulary',
     ];
