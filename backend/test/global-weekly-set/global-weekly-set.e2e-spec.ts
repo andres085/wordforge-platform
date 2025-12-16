@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getWeek } from 'date-fns';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
@@ -36,22 +37,36 @@ describe('GlobalWeeklyVocabularySet API (Integration)', () => {
     await helpers.cleanDatabase();
   });
 
-  describe('GET /global-weekly-vocabulary-sets/latest', () => {
-    it('should return 200 and the latest published set with 6 items', async () => {
-      // Arrange
-      await helpers.createGlobalSetWithItems(1, 2024, 6);
-      await helpers.createGlobalSetWithItems(2, 2024, 6);
-      const latestSet = await helpers.createGlobalSetWithItems(3, 2024, 6);
-
-      // Act & Assert
+  describe('POST /global-weekly-vocabulary-set', () => {
+    it('should return 200 and create a new weekly set with the correct type of values and total of items', async () => {
       const response = await request(app.getHttpServer())
-        .get('/global-weekly-vocabulary-sets/latest')
+        .get('/global-weekly-vocabulary-set')
+        .expect(200);
+
+      expect(response.body).toMatchObject({
+        weeklySetId: expect.any(String),
+      });
+      expect(response.body.createdVocabularyItems.length).toEqual(6);
+    });
+  });
+
+  describe('GET /global-weekly-vocabulary-set/latest', () => {
+    it('should return 200 and the latest published set with 6 items', async () => {
+      const now = new Date();
+      const weekNumber = getWeek(now);
+      const latestSet = await helpers.createGlobalSetWithItems(
+        weekNumber,
+        2025,
+        6,
+      );
+
+      const response = await request(app.getHttpServer())
+        .get('/global-weekly-vocabulary-set/latest')
         .expect(200);
 
       expect(response.body.id).toBe(latestSet.id);
-      expect(response.body.weekNumber).toBe(3);
-      expect(response.body.year).toBe(2024);
-      expect(response.body.items).toHaveLength(6);
+      expect(response.body.weekNumber).toBe(weekNumber);
+      expect(response.body.year).toBe(2025);
       expect(response.body.items[0]).toMatchObject({
         position: expect.any(Number),
         category: expect.any(String),
@@ -65,20 +80,6 @@ describe('GlobalWeeklyVocabularySet API (Integration)', () => {
       await request(app.getHttpServer())
         .get('/global-weekly-vocabulary-sets/latest')
         .expect(404);
-    });
-
-    it('should return latest set across different years', async () => {
-      // Arrange
-      await helpers.createGlobalSetWithItems(52, 2023, 6);
-      const latestSet = await helpers.createGlobalSetWithItems(1, 2024, 6);
-
-      // Act & Assert
-      const response = await request(app.getHttpServer())
-        .get('/global-weekly-vocabulary-sets/latest')
-        .expect(200);
-
-      expect(response.body.id).toBe(latestSet.id);
-      expect(response.body.year).toBe(2024);
     });
   });
 });

@@ -23,7 +23,7 @@ export const createMockAiService = () => ({
     },
     {
       position: 4,
-      category: 'Proverbs',
+      category: 'Proverbs/sayings',
       term: 'Better late than never',
       definition: "it's better to do something late than not at all",
       example: 'I finally finished the book—better late than never!',
