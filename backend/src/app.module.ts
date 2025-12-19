@@ -12,6 +12,7 @@ import {
   UserWeeklyVocabularySet,
 } from './weekly-vocabulary-set/entities';
 import { WeeklyVocabularySetModule } from './weekly-vocabulary-set/weekly-vocabulary-set.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { WeeklyVocabularySetModule } from './weekly-vocabulary-set/weekly-vocabu
       }),
     }),
     AuthModule,
+    AiModule,
   ],
   controllers: [],
   providers: [],

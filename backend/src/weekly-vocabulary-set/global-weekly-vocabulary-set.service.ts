@@ -2,7 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { getWeek, getYear } from 'date-fns';
 import { DataSource, Repository } from 'typeorm';
-import { AiService } from '../vocabulary/ai.service';
+import { AiService } from '../ai/ai.service';
 import { GlobalVocabularyItem } from '../vocabulary/entities/global/global-vocabulary-item.entity';
 import { UpdateGlobalWeeklyVocabularySetDto } from './dto/global/update-global-weekly-vocabulary-set.dto';
 import { GlobalWeeklyVocabularySet } from './entities';

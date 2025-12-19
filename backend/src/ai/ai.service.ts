@@ -6,13 +6,21 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UpdateGlobalVocabularyDto } from './dto/global/update-global-vocabulary.dto';
-import { GlobalVocabularyItem } from './entities';
+import { UpdateGlobalVocabularyDto } from '../vocabulary/dto/global/update-global-vocabulary.dto';
+import { GlobalVocabularyItem } from '../vocabulary/entities';
 
 @Injectable()
 export class AiService {
   private genAI: GoogleGenAI;
   private readonly logger: Logger;
+  private readonly VALID_CATEGORIES = [
+    'Phrasal verbs',
+    'Fixed expressions',
+    'Binomials',
+    'Proverbs/sayings',
+    'Discourse markers',
+    'Register-specific vocabulary',
+  ];
 
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
@@ -102,18 +110,9 @@ export class AiService {
       return false;
     }
 
-    const expectedCategories = [
-      'Phrasal verbs',
-      'Fixed expressions',
-      'Binomials',
-      'Proverbs/sayings',
-      'Discourse markers',
-      'Register-specific vocabulary',
-    ];
-
     const uniqueCategories = new Set();
     for (let vocabularyItem of vocabularyItems) {
-      if (!expectedCategories.includes(vocabularyItem.category)) {
+      if (!this.VALID_CATEGORIES.includes(vocabularyItem.category)) {
         this.logger.debug(
           `Validation failed: unknown category "${vocabularyItem.category}"`,
         );
@@ -123,11 +122,11 @@ export class AiService {
     }
 
     if (uniqueCategories.size !== 6) {
-      const missing = expectedCategories.filter(
+      const missing = this.VALID_CATEGORIES.filter(
         (cat) => !uniqueCategories.has(cat),
       );
       this.logger.debug(
-        `Validation failed: missing or duplicate categories. Got: ${Array.from(uniqueCategories)}`,
+        `Validation failed: missing or duplicate categories. Got: ${Array.from(uniqueCategories)}, Missing: ${missing}`,
       );
       return false;
     }
@@ -138,15 +137,6 @@ export class AiService {
   private reorderAndSanitize(
     items: GlobalVocabularyItem[],
   ): GlobalVocabularyItem[] {
-    const expectedOrder = [
-      'Phrasal verbs',
-      'Fixed expressions',
-      'Binomials',
-      'Proverbs/sayings',
-      'Discourse markers',
-      'Register-specific vocabulary',
-    ];
-
     const itemsByCategory = new Map<string, GlobalVocabularyItem>();
     for (let item of items) {
       itemsByCategory.set(item.category, item);
@@ -154,8 +144,8 @@ export class AiService {
 
     const reorderedItems: GlobalVocabularyItem[] = [];
 
-    for (let i = 0; i < expectedOrder.length; i++) {
-      const category = expectedOrder[i];
+    for (let i = 0; i < this.VALID_CATEGORIES.length; i++) {
+      const category = this.VALID_CATEGORIES[i];
       const item = itemsByCategory.get(category) as GlobalVocabularyItem;
 
       reorderedItems.push({

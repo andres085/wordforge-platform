@@ -40,7 +40,7 @@ export class UserWeeklyVocabularySetService {
   }
 
   async create(userId: string) {
-    return this.dataSource.manager.transaction(
+    return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
         const hasLatest = await this.findLatestUserSet();
         if (hasLatest)

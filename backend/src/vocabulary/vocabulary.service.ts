@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AiService } from './ai.service';
+import { AiService } from '../ai/ai.service';
 import { UpdateGlobalVocabularyDto } from './dto/global/update-global-vocabulary.dto';
 import { UserVocabularyItem } from './entities';
 import { GlobalVocabularyItem } from './entities/global/global-vocabulary-item.entity';

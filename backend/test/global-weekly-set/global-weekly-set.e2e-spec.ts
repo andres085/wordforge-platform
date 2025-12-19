@@ -3,8 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getWeek } from 'date-fns';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
+import { AiService } from '../../src/ai/ai.service';
 import { AppModule } from '../../src/app.module';
-import { AiService } from '../../src/vocabulary/ai.service';
 import { TestHelpers } from '../helpers/test-helpers';
 import { createMockAiService } from '../mocks/ai-service.mock';
 
