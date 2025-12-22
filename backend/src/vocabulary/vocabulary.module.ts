@@ -1,14 +1,17 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AiService } from './ai.service';
-import { VocabularyItem } from './entities/vocabulary-item.entity';
+import { AiModule } from '../ai/ai.module';
+import { GlobalVocabularyItem, UserVocabularyItem } from './entities';
 import { VocabularyController } from './vocabulary.controller';
 import { VocabularyService } from './vocabulary.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([VocabularyItem])],
+  imports: [
+    TypeOrmModule.forFeature([GlobalVocabularyItem, UserVocabularyItem]),
+    AiModule,
+  ],
   controllers: [VocabularyController],
-  providers: [VocabularyService, AiService],
-  exports: [AiService, TypeOrmModule],
+  providers: [VocabularyService],
+  exports: [TypeOrmModule],
 })
 export class VocabularyModule {}

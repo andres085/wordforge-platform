@@ -3,17 +3,15 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { VocabularyItem } from '../../vocabulary/entities/vocabulary-item.entity';
+import { GlobalVocabularyItem } from '../../../vocabulary/entities';
 
-@Entity('weekly_vocabulary_sets')
+@Entity('global_weekly_vocabulary_sets')
 @Index(['year', 'weekNumber'], { unique: true })
-export class WeeklyVocabularySet {
+export class GlobalWeeklyVocabularySet {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -32,14 +30,9 @@ export class WeeklyVocabularySet {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @OneToMany(() => VocabularyItem, (item) => item.weeklySet, {
+  @OneToMany(() => GlobalVocabularyItem, (item) => item.weeklySet, {
     cascade: true,
     eager: true,
   })
-  items: VocabularyItem[];
-
-  @ManyToOne(() => User, (user) => user.weeklySets, {
-    cascade: true,
-  })
-  user: User;
+  items: GlobalVocabularyItem[];
 }

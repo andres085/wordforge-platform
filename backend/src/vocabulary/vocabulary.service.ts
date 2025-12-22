@@ -5,16 +5,17 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AiService } from './ai.service';
-import { UpdateVocabularyDto } from './dto/update-vocabulary.dto';
-import { VocabularyItem } from './entities/vocabulary-item.entity';
+import { AiService } from '../ai/ai.service';
+import { UpdateGlobalVocabularyDto } from './dto/global/update-global-vocabulary.dto';
+import { UserVocabularyItem } from './entities';
+import { GlobalVocabularyItem } from './entities/global/global-vocabulary-item.entity';
 
 @Injectable()
 export class VocabularyService {
   constructor(
     private readonly aiService: AiService,
-    @InjectRepository(VocabularyItem)
-    private vocabularyItemRepository: Repository<VocabularyItem>,
+    @InjectRepository(GlobalVocabularyItem)
+    private vocabularyItemRepository: Repository<GlobalVocabularyItem>,
   ) {}
 
   findAll() {
@@ -31,8 +32,8 @@ export class VocabularyService {
     return foundItem;
   }
 
-  async update(id: string, updateVocabularyDto: UpdateVocabularyDto) {
-    const foundItem = await this.findOne(id);
+  async update(id: string, updateVocabularyDto: UpdateGlobalVocabularyDto) {
+    const foundItem = (await this.findOne(id)) as UserVocabularyItem;
 
     if (foundItem.regenerationCount >= 3)
       throw new BadRequestException(
@@ -52,13 +53,13 @@ export class VocabularyService {
   }
 
   async updateStatus(id: string, status: boolean) {
-    const foundItem = await this.findOne(id);
+    const foundItem = (await this.findOne(id)) as UserVocabularyItem;
 
-    foundItem.isUsed = status;
+    foundItem.isCompleted = status;
     if (status) {
-      foundItem.usedAt = new Date();
+      foundItem.completedAt = new Date();
     } else {
-      foundItem.usedAt = null;
+      foundItem.completedAt = null;
     }
 
     return await this.vocabularyItemRepository.save(foundItem);

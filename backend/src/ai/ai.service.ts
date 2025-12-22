@@ -3,13 +3,24 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UpdateVocabularyDto } from './dto/update-vocabulary.dto';
+import { UpdateGlobalVocabularyDto } from '../vocabulary/dto/global/update-global-vocabulary.dto';
+import { GlobalVocabularyItem } from '../vocabulary/entities';
 
 @Injectable()
 export class AiService {
   private genAI: GoogleGenAI;
+  private readonly logger: Logger;
+  private readonly VALID_CATEGORIES = [
+    'Phrasal verbs',
+    'Fixed expressions',
+    'Binomials',
+    'Proverbs/sayings',
+    'Discourse markers',
+    'Register-specific vocabulary',
+  ];
 
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
@@ -19,6 +30,7 @@ export class AiService {
     }
 
     this.genAI = new GoogleGenAI({});
+    this.logger = new Logger();
   }
 
   async generateVocabulary() {
@@ -58,7 +70,7 @@ export class AiService {
         // ... 4 more items
       ]
 
-      Return ONLY the JSON array, no additional text or markdown like the json tag at the start.`;
+      Return ONLY the JSON array, no additional text or markdown like the json tag at the start. IMPORTANT: every item should have his postion number in it going from 1 to 6 based on the list.`;
 
     const response = await this.genAI.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -71,13 +83,84 @@ export class AiService {
     try {
       const parsedResponse = JSON.parse(response.text as string);
 
-      return parsedResponse;
+      const isValid = this.validateVocabularyItemsCategory(parsedResponse);
+      if (!isValid)
+        throw new InternalServerErrorException(
+          'Vocabulary Items list is not valid',
+        );
+
+      return this.reorderAndSanitize(parsedResponse);
     } catch (error) {
-      throw new BadRequestException('Failed to parse response from AI service');
+      this.logger.error(error.message);
+      throw new InternalServerErrorException(
+        'Failed to parse response from AI service',
+      );
     }
   }
 
-  async generateVocabularyItem(updateVocabularyDto: UpdateVocabularyDto) {
+  private validateVocabularyItemsCategory(
+    vocabularyItems: GlobalVocabularyItem[],
+  ): boolean {
+    if (!Array.isArray(vocabularyItems)) {
+      this.logger.debug('Validation failed: not an array');
+      return false;
+    }
+
+    if (vocabularyItems.length !== 6) {
+      this.logger.debug(
+        `Validation failed: expected 6 items, got ${vocabularyItems.length}`,
+      );
+      return false;
+    }
+
+    const uniqueCategories = new Set();
+    for (let vocabularyItem of vocabularyItems) {
+      if (!this.VALID_CATEGORIES.includes(vocabularyItem.category)) {
+        this.logger.debug(
+          `Validation failed: unknown category "${vocabularyItem.category}"`,
+        );
+        return false;
+      }
+      uniqueCategories.add(vocabularyItem.category);
+    }
+
+    if (uniqueCategories.size !== 6) {
+      const missing = this.VALID_CATEGORIES.filter(
+        (cat) => !uniqueCategories.has(cat),
+      );
+      this.logger.debug(
+        `Validation failed: missing or duplicate categories. Got: ${Array.from(uniqueCategories)}, Missing: ${missing}`,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  private reorderAndSanitize(
+    items: GlobalVocabularyItem[],
+  ): GlobalVocabularyItem[] {
+    const itemsByCategory = new Map<string, GlobalVocabularyItem>();
+    for (let item of items) {
+      itemsByCategory.set(item.category, item);
+    }
+
+    const reorderedItems: GlobalVocabularyItem[] = [];
+
+    for (let i = 0; i < this.VALID_CATEGORIES.length; i++) {
+      const category = this.VALID_CATEGORIES[i];
+      const item = itemsByCategory.get(category) as GlobalVocabularyItem;
+
+      reorderedItems.push({
+        ...item,
+        position: i + 1,
+      });
+    }
+
+    return reorderedItems;
+  }
+
+  async generateVocabularyItem(updateVocabularyDto: UpdateGlobalVocabularyDto) {
     const prompt = `You are a vocabulary enrichment assistant. Generate a new English vocabulary item to update this one:
 
       - ${updateVocabularyDto.category}

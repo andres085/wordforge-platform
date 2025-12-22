@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { WeeklyVocabularySet } from '../../weekly-vocabulary-set/entities/weekly-vocabulary-set.entity';
+import { UserWeeklyVocabularySet } from '../../weekly-vocabulary-set/entities/user/user-weekly-vocabulary-set.entity';
 
 @Entity('users')
 export class User {
@@ -31,6 +31,6 @@ export class User {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => WeeklyVocabularySet, (weeklySet) => weeklySet.user)
-  weeklySets: WeeklyVocabularySet[];
+  @OneToMany(() => UserWeeklyVocabularySet, (weeklySet) => weeklySet.user)
+  weeklySets: UserWeeklyVocabularySet[];
 }
