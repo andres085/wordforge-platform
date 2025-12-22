@@ -91,7 +91,10 @@ export class AiService {
 
       return this.reorderAndSanitize(parsedResponse);
     } catch (error) {
-      throw new BadRequestException('Failed to parse response from AI service');
+      this.logger.error(error.message);
+      throw new InternalServerErrorException(
+        'Failed to parse response from AI service',
+      );
     }
   }
 
