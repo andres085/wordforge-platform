@@ -73,7 +73,7 @@ const authStore = useAuthStore();
           class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-24"
         >
           <RouterLink
-            to="/register"
+            to="/vocabulary"
             class="w-full sm:w-auto px-20 py-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg rounded-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 transform"
           >
             Start Learning Free

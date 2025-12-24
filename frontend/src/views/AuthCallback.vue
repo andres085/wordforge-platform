@@ -9,6 +9,9 @@ const authStore = useAuthStore();
 
 onMounted(async () => {
   const token = route.query.token as string;
+  // BACKEND: Backend should pass this redirect parameter from OAuth callback
+  // Expected URL: /auth/callback?token=xxx&redirect=/vocabulary
+  const redirect = route.query.redirect as string;
 
   if (token) {
     // Store access token in memory (not localStorage!)
@@ -17,8 +20,8 @@ onMounted(async () => {
     // Fetch user profile
     await authStore.fetchUser();
 
-    // Redirect to dashboard
-    router.push("/vocabulary");
+    // Redirect to intended destination or default to vocabulary page
+    router.push(redirect || "/vocabulary");
   } else {
     // No token, something went wrong
     router.push("/login");

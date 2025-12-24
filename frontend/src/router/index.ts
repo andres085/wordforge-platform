@@ -30,7 +30,7 @@ const router = createRouter({
       path: "/vocabulary",
       name: "Vocabulary",
       component: () => import("../views/VocabularyPage.vue"),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
   ],
 });
@@ -58,9 +58,15 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next("/login");
+    // Store the intended destination and redirect to login
+    next({
+      path: "/login",
+      query: { redirect: to.fullPath },
+    });
   } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next("/vocabulary"); // Redirect authenticated users to vocabulary page
+    // Check if there's a redirect parameter, otherwise go to vocabulary
+    const redirect = (to.query.redirect as string) || "/vocabulary";
+    next(redirect);
   } else {
     next();
   }

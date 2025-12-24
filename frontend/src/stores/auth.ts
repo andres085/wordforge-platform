@@ -73,8 +73,17 @@ export const useAuthStore = defineStore("auth", {
       this.isLoading = false;
     },
 
-    loginWithGoogle() {
-      window.location.href = "http://localhost:3000/auth/google";
+    loginWithGoogle(redirect?: string) {
+      // BACKEND TODO (Optional): Handle redirect parameter in OAuth flow
+      // 1. In auth.controller.ts @Get('google') - store redirect in session
+      // 2. In @Get('google/callback') - retrieve redirect from session
+      // 3. Pass redirect to frontend callback URL:
+      //    `${FRONTEND_URL}/auth/callback?token=${token}&redirect=${redirect}`
+      // 4. AuthCallback.vue will handle the redirect and navigate user back
+      const redirectParam = redirect
+        ? `?redirect=${encodeURIComponent(redirect)}`
+        : "";
+      window.location.href = `http://localhost:3000/auth/google${redirectParam}`;
     },
 
     async logout() {

@@ -22,15 +22,15 @@ export class UserWeeklyVocabularySetController {
   @UseGuards(JwtAuthGuard)
   @Get('/latest')
   latestWeeklyVocabularySet(@Request() req: any) {
-    console.log({ user: req.user });
-    // return this.userWeeklyVocabularySetService.findLatestSet();
+    const { userId } = req.user;
+    return this.userWeeklyVocabularySetService.findLatestUserSet(userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post()
   createUserWeeklyVocabularySet(@Request() req: any) {
-    const user = req.user;
-    return this.userWeeklyVocabularySetService.create(user.userId);
+    const { userId } = req.user;
+    return this.userWeeklyVocabularySetService.create(userId);
   }
 
   @Get()

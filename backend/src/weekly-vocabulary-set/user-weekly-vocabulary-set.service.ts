@@ -42,7 +42,7 @@ export class UserWeeklyVocabularySetService {
   async create(userId: string) {
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
-        const hasLatest = await this.findLatestUserSet();
+        const hasLatest = await this.hasLatestUserSet(userId);
         if (hasLatest)
           throw new BadRequestException(
             "Can't generate a new set without completing the current one",
@@ -77,17 +77,40 @@ export class UserWeeklyVocabularySetService {
     );
   }
 
-  async findLatestUserSet() {
+  private async hasLatestUserSet(userId: string): Promise<boolean> {
     const now = new Date();
     const weekNumber = getWeek(now);
     const year = getYear(now);
 
-    return await this.userWeeklyVocabularyRepository.findOne({
-      where: {
-        weekNumber,
-        year,
-      },
+    const count = await this.userWeeklyVocabularyRepository.count({
+      where: { weekNumber, year, userId },
     });
+
+    return count > 0;
+  }
+
+  async findLatestUserSet(userId: string) {
+    const now = new Date();
+    const weekNumber = getWeek(now);
+    const year = getYear(now);
+
+    try {
+      const latestUserSet = await this.userWeeklyVocabularyRepository.findOne({
+        where: {
+          weekNumber,
+          year,
+          userId,
+        },
+        relations: { items: true },
+      });
+
+      if (!latestUserSet)
+        throw new NotFoundException('User latest set not found');
+
+      return latestUserSet;
+    } catch (error) {
+      throw error;
+    }
   }
 
   findAll() {
