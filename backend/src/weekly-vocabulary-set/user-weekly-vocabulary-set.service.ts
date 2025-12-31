@@ -10,8 +10,9 @@ import {
   GlobalVocabularyItem,
   UserVocabularyItem,
 } from '../vocabulary/entities';
-import { UpdateGlobalWeeklyVocabularySetDto } from './dto/global/update-global-weekly-vocabulary-set.dto';
+import { UpdateUserWeeklyVocabularySetDto } from './dto/user/update-user-weekly-vocabulary-set.dto';
 import { GlobalWeeklyVocabularySet, UserWeeklyVocabularySet } from './entities';
+import { UserWeeklyVocabularySetStatus } from './entities/user/user-weekly-vocabulary-set.entity';
 
 @Injectable()
 export class UserWeeklyVocabularySetService {
@@ -121,11 +122,39 @@ export class UserWeeklyVocabularySetService {
     return `This action returns a #${id} weeklyVocabularySet`;
   }
 
-  update(
-    id: number,
-    updateWeeklyVocabularySetDto: UpdateGlobalWeeklyVocabularySetDto,
+  async update(
+    id: string,
+    updateWeeklyVocabularySetDto: UpdateUserWeeklyVocabularySetDto,
   ) {
-    return `This action updates a #${id} weeklyVocabularySet`;
+    let activeSet = await this.userWeeklyVocabularyRepository.findOneBy({
+      id,
+    });
+
+    if (!activeSet?.isActive)
+      throw new NotFoundException('Set to update not found or completed');
+
+    const userVocabularyItems = updateWeeklyVocabularySetDto.items.map(
+      (item) => ({
+        ...item,
+        completedAt: item.isCompleted ? new Date() : null,
+      }),
+    );
+
+    const updatedItems =
+      await this.userVocabularyItemRepository.save(userVocabularyItems);
+    const isSetComplete = updatedItems.every((item) => item.isCompleted);
+
+    if (isSetComplete) {
+      activeSet = await this.userWeeklyVocabularyRepository.save({
+        ...updateWeeklyVocabularySetDto,
+        completedAt: new Date(),
+        status: UserWeeklyVocabularySetStatus.COMPLETE,
+        isActive: false,
+      });
+    }
+
+    // Outputs the entire data
+    return { ...activeSet };
   }
 
   remove(id: number) {

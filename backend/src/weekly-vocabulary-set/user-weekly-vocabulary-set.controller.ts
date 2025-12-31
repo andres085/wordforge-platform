@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { UpdateGlobalWeeklyVocabularySetDto } from './dto/global/update-global-weekly-vocabulary-set.dto';
+import { UpdateUserWeeklyVocabularySetDto } from './dto/user/update-user-weekly-vocabulary-set.dto';
 import { UserWeeklyVocabularySetService } from './user-weekly-vocabulary-set.service';
 
 @Controller('user-weekly-vocabulary-set')
@@ -46,10 +46,10 @@ export class UserWeeklyVocabularySetController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateWeeklyVocabularySetDto: UpdateGlobalWeeklyVocabularySetDto,
+    @Body() updateWeeklyVocabularySetDto: UpdateUserWeeklyVocabularySetDto,
   ) {
     return this.userWeeklyVocabularySetService.update(
-      +id,
+      id,
       updateWeeklyVocabularySetDto,
     );
   }
