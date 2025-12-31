@@ -1,11 +1,13 @@
 <script setup>
-import { RouterLink } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 
 const authStore = useAuthStore();
+const route = useRoute();
 
 const handleGoogleLogin = () => {
-  authStore.loginWithGoogle();
+  const redirect = route.query.redirect;
+  authStore.loginWithGoogle(redirect);
 };
 </script>
 
@@ -13,12 +15,18 @@ const handleGoogleLogin = () => {
   <div
     class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4"
   >
-    <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
+    <div
+      class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100"
+    >
       <!-- Logo/Title -->
       <div class="text-center mb-10">
         <div class="flex items-center justify-center gap-3 mb-4">
           <span class="text-5xl">🔥</span>
-          <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">WordForge</h1>
+          <h1
+            class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"
+          >
+            WordForge
+          </h1>
         </div>
         <p class="text-gray-600 text-lg">Sign in to continue learning</p>
       </div>
@@ -74,7 +82,10 @@ const handleGoogleLogin = () => {
 
       <!-- Back to Home -->
       <div class="text-center mt-8">
-        <RouterLink to="/" class="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+        <RouterLink
+          to="/"
+          class="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+        >
           ← Back to home
         </RouterLink>
       </div>

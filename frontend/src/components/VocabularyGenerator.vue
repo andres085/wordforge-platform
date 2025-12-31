@@ -14,20 +14,42 @@
           </h1>
         </div>
         <p class="text-gray-600 text-lg">
-          Forge your vocabulary, one week at a time
+          {{
+            isAuthenticated
+              ? "Your personal vocabulary journey"
+              : "Forge your vocabulary, one week at a time"
+          }}
         </p>
       </div>
 
-      <!-- Generate Button -->
-      <div class="flex justify-center mb-8">
-        <button
-          @click="generateVocabulary"
-          :disabled="loading"
-          class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-xl disabled:bg-gray-400 text-white font-bold py-4 px-12 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
-        >
-          <span v-if="!loading">✨ Generate Vocabulary</span>
-          <span v-else>🔄 Generating...</span>
-        </button>
+      <!-- Login CTA for unauthenticated users -->
+      <div
+        v-if="!isAuthenticated && vocabularyItems.length > 0"
+        class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl shadow-lg p-6 mb-8"
+      >
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h3 class="text-xl font-bold mb-2">Want to track your progress?</h3>
+            <p class="text-indigo-100">
+              Sign in to get your personal vocabulary set and track completed
+              items.
+            </p>
+          </div>
+          <div class="flex gap-3">
+            <button
+              @click="router.push('/login')"
+              class="bg-white text-indigo-600 font-semibold px-6 py-3 rounded-lg hover:bg-gray-100 transition-all"
+            >
+              Sign In
+            </button>
+            <button
+              @click="router.push('/register')"
+              class="bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg hover:bg-indigo-800 transition-all"
+            >
+              Sign Up Free
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Error Message -->
@@ -39,16 +61,17 @@
         <p>{{ error }}</p>
       </div>
 
-      <!-- Progress Stats -->
+      <!-- Progress Stats (only for authenticated users) -->
       <div
-        v-if="vocabularyItems.length > 0"
+        v-if="isAuthenticated && vocabularyItems.length > 0"
         class="bg-white rounded-xl shadow-lg p-6 mb-8"
       >
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-lg font-semibold text-gray-700">Progress</h3>
+            <h3 class="text-lg font-semibold text-gray-700">Your Progress</h3>
             <p class="text-sm text-gray-500">
-              {{ completedCount }} of {{ vocabularyItems.length }} items used
+              {{ completedCount }} of {{ vocabularyItems.length }} items
+              completed
             </p>
           </div>
           <div class="flex items-center gap-4">
@@ -71,7 +94,11 @@
       <div v-if="vocabularyItems.length > 0" class="space-y-6 mt-6">
         <div class="flex justify-between items-center mb-8">
           <h2 class="text-2xl font-bold text-gray-800">
-            This Week's Vocabulary
+            {{
+              isAuthenticated
+                ? "Your Weekly Vocabulary"
+                : "This Week's Vocabulary"
+            }}
           </h2>
           <span class="text-sm text-gray-500">{{ generatedAt }}</span>
         </div>
@@ -79,7 +106,7 @@
         <!-- Vocabulary Cards -->
         <div
           v-for="(item, index) in vocabularyItems"
-          :key="index"
+          :key="item.id"
           class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-l-4"
           :class="[
             item.checked ? 'border-green-500 bg-green-50' : 'border-indigo-500',
@@ -90,19 +117,27 @@
             <div class="flex-shrink-0 pt-1">
               <input
                 type="checkbox"
-                :id="`item-${index}`"
+                :id="`item-${item.id}`"
                 v-model="item.checked"
-                @change="saveProgress"
-                class="w-6 h-6 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer"
+                @change="saveProgress(item)"
+                :disabled="item.isReadOnly"
+                class="w-6 h-6 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
+                :class="{
+                  'cursor-pointer': !item.isReadOnly,
+                  'cursor-not-allowed opacity-50': item.isReadOnly,
+                }"
               />
             </div>
 
             <!-- Content -->
             <div class="flex-grow">
               <label
-                :for="`item-${index}`"
-                class="cursor-pointer block"
-                :class="{ 'opacity-60': item.checked }"
+                :for="`item-${item.id}`"
+                class="block"
+                :class="{
+                  'cursor-pointer': !item.isReadOnly,
+                  'opacity-60': item.checked,
+                }"
               >
                 <!-- Category -->
                 <div class="flex items-center gap-2 mb-4">
@@ -115,7 +150,7 @@
                     v-if="item.checked"
                     class="text-green-600 text-sm font-medium"
                   >
-                    ✓ Used
+                    ✓ Completed
                   </span>
                 </div>
 
@@ -127,7 +162,7 @@
                   <p class="text-gray-600">{{ item.definition }}</p>
                 </div>
 
-                <!-- Example(s) -->
+                <!-- Example -->
                 <div class="space-y-3">
                   <p
                     class="text-gray-700 italic pl-4 border-l-2 border-gray-300"
@@ -141,17 +176,25 @@
         </div>
       </div>
 
-      <!-- Empty State -->
+      <!-- Loading State -->
       <div
-        v-else-if="!loading"
+        v-else-if="loading"
         class="bg-white rounded-xl shadow-xl p-12 text-center"
       >
+        <div
+          class="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-6"
+        ></div>
+        <p class="text-gray-600">Loading vocabulary...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else class="bg-white rounded-xl shadow-xl p-12 text-center">
         <div class="text-6xl mb-4">📚</div>
         <h3 class="text-xl font-semibold text-gray-700 mb-2">
-          No Vocabulary Yet
+          No Vocabulary Available
         </h3>
         <p class="text-gray-500">
-          Click the button above to generate your first vocabulary list!
+          Check back later for this week's vocabulary!
         </p>
       </div>
     </div>
@@ -159,13 +202,20 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
-import { api } from "../stores/auth";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import { api, useAuthStore } from "../stores/auth";
+
+const router = useRouter();
+const authStore = useAuthStore();
 
 const vocabularyItems = ref([]);
 const loading = ref(false);
 const error = ref("");
 const generatedAt = ref("");
+
+// Computed property for authentication state
+const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 // Computed properties for progress tracking
 const completedCount = computed(() => {
@@ -179,85 +229,150 @@ const completionPercentage = computed(() => {
   );
 });
 
-// Parse the vocabulary text into structured items
-const parseVocabulary = (vocabularyItems) => {
-  const items = [];
-
-  for (let item of vocabularyItems) {
-    // Start a new item
-    items.push({
-      category: item.category,
-      term: item.term,
-      definition: item.definition,
-      examples: item.example,
-      checked: item.isUsed,
-    });
-  }
-
-  return items;
-};
-
-// Save progress to localStorage
-const saveProgress = () => {
-  localStorage.setItem(
-    "wordforge-progress",
-    JSON.stringify({
-      items: vocabularyItems.value,
-      generatedAt: generatedAt.value,
-    })
-  );
-};
-
-// Load progress from localStorage
-const loadProgress = () => {
-  const saved = localStorage.getItem("wordforge-progress");
-  if (saved) {
-    try {
-      const data = JSON.parse(saved);
-      vocabularyItems.value = data.items;
-      generatedAt.value = data.generatedAt;
-    } catch (e) {
-      console.error("Failed to load progress:", e);
-    }
-  }
-};
-
-const generateVocabulary = async () => {
+// Fetch global set (for unauthenticated users)
+const fetchGlobalSet = async () => {
   loading.value = true;
   error.value = "";
 
   try {
-    const response = await api.get(
-      "http://localhost:3000/weekly-vocabulary-set/latest"
-    );
+    // BACKEND: This endpoint should already exist and work
+    // GET /global-weekly-vocabulary-set/latest
+    // - No authentication required
+    // - Should return { items: [...], createdAt: Date, ... }
+    const response = await api.get("/global-weekly-vocabulary-set/latest");
 
-    console.log({ data: response.data });
-    if (response.data) {
-      vocabularyItems.value = response.data.items;
-      generatedAt.value = response.data.createdAt;
-      saveProgress();
-    } else {
-      error.value = response.data.error || "Failed to generate vocabulary";
+    if (response.data && response.data.items) {
+      vocabularyItems.value = response.data.items.map((item) => ({
+        id: item.id,
+        category: item.category,
+        term: item.term,
+        definition: item.definition,
+        example: item.example,
+        checked: false,
+        isReadOnly: true, // Disable checkboxes for unauthenticated users
+      }));
+      generatedAt.value = new Date(
+        response.data.createdAt
+      ).toLocaleDateString();
     }
   } catch (err) {
-    console.error(err);
-    error.value =
-      err.response?.data?.message ||
-      err.message ||
-      "Failed to connect to the server";
+    error.value = err.response?.data?.message || "Failed to load vocabulary";
   } finally {
     loading.value = false;
   }
 };
 
-// Load progress on mount
-loadProgress();
+// Fetch user's personal set (for authenticated users)
+const fetchUserSet = async () => {
+  loading.value = true;
+  error.value = "";
 
-// Auto-fetch vocabulary from backend when component is mounted
-onMounted(() => {
-  // If no cached data, fetch from backend
-  if (vocabularyItems.value.length === 0) {
-    generateVocabulary();
+  try {
+    // BACKEND TODO: Implement this endpoint in user-weekly-vocabulary-set.controller.ts
+    // GET /user-weekly-vocabulary-set/latest
+    // - Requires authentication (JwtAuthGuard)
+    // - Extract userId from req.user.userId
+    // - Call service: findLatestUserSet(userId) with relations: ['items']
+    // - Should return { items: [...], createdAt: Date, ... } with isCompleted field on items
+    // - Return 404 if user doesn't have a set for current week
+    const response = await api.get("/user-weekly-vocabulary-set/latest");
+
+    if (response.data && response.data.items) {
+      vocabularyItems.value = response.data.items.map((item) => ({
+        id: item.id,
+        category: item.category,
+        term: item.term,
+        definition: item.definition,
+        example: item.example,
+        checked: item.isCompleted || false,
+        isReadOnly: false, // Enable checkboxes for authenticated users
+      }));
+      generatedAt.value = new Date(
+        response.data.createdAt
+      ).toLocaleDateString();
+    }
+  } catch (err) {
+    if (err.response?.status === 404) {
+      // No user set exists, create one
+      try {
+        // BACKEND: This endpoint should already exist in user-weekly-vocabulary-set.controller.ts
+        // POST /user-weekly-vocabulary-set
+        // - Requires authentication (JwtAuthGuard)
+        // - Extract userId from req.user.userId
+        // - Creates user's copy of 6 items from global weekly set
+        // - Service should check if user already has a set for current week
+        const response = await api.post("/user-weekly-vocabulary-set");
+
+        // Use the response directly instead of fetching again
+        if (response.data && response.data.items) {
+          vocabularyItems.value = response.data.items.map((item) => ({
+            id: item.id,
+            category: item.category,
+            term: item.term,
+            definition: item.definition,
+            example: item.example,
+            checked: item.isCompleted || false,
+            isReadOnly: false,
+          }));
+          generatedAt.value = new Date(
+            response.data.createdAt
+          ).toLocaleDateString();
+        }
+      } catch (createErr) {
+        error.value =
+          createErr.response?.data?.message ||
+          "Failed to create your vocabulary set";
+      }
+    } else {
+      error.value =
+        err.response?.data?.message || "Failed to load your vocabulary";
+    }
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Save progress to backend (only for authenticated users)
+const saveProgress = async (item) => {
+  if (!isAuthenticated.value || item.isReadOnly) return;
+
+  try {
+    // BACKEND TODO: Update this endpoint in vocabulary.controller.ts
+    // PATCH /vocabulary/status/:id
+    // - Requires authentication (JwtAuthGuard)
+    // - Should update UserVocabularyItem with id = :id
+    // - Body: { isUsed: boolean }
+    // - Update isCompleted field (and completedAt timestamp)
+    // - Verify item belongs to authenticated user (security check!)
+    await api.patch(`/vocabulary/status/${item.id}`, {
+      isUsed: item.checked,
+    });
+  } catch (err) {
+    console.error("Failed to save progress:", err);
+    error.value = "Failed to save progress. Please try again.";
+    // Revert the checkbox state on error
+    item.checked = !item.checked;
+  }
+};
+
+// Watch for authentication changes
+watch(isAuthenticated, async (newValue, oldValue) => {
+  // User just logged in
+  if (newValue && !oldValue) {
+    await fetchUserSet();
+  }
+  // User just logged out
+  else if (!newValue && oldValue) {
+    await fetchGlobalSet();
+  }
+});
+
+// Initial data fetch
+onMounted(async () => {
+  if (isAuthenticated.value) {
+    await fetchUserSet();
+  } else {
+    await fetchGlobalSet();
   }
 });
 </script>
@@ -271,5 +386,9 @@ input[type="checkbox"] {
 input[type="checkbox"]:checked {
   background-color: #4f46e5;
   border-color: #4f46e5;
+}
+
+input[type="checkbox"]:disabled {
+  cursor: not-allowed;
 }
 </style>

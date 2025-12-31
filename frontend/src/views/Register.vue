@@ -1,14 +1,16 @@
 <script setup>
 import { ref } from "vue";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 
 const authStore = useAuthStore();
+const route = useRoute();
 
 const errors = ref({});
 
 const handleGoogleRegister = () => {
-  authStore.loginWithGoogle();
+  const redirect = route.query.redirect as string;
+  authStore.loginWithGoogle(redirect);
 };
 </script>
 
