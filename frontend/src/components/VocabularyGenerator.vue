@@ -267,8 +267,6 @@ const fetchUserSet = async () => {
   loading.value = true;
   error.value = "";
 
-  console.log("[fetchUserSet] Starting - trying to get latest user set");
-
   try {
     // BACKEND TODO: Implement this endpoint in user-weekly-vocabulary-set.controller.ts
     // GET /user-weekly-vocabulary-set/latest
@@ -278,7 +276,6 @@ const fetchUserSet = async () => {
     // - Should return { items: [...], createdAt: Date, ... } with isCompleted field on items
     // - Return 404 if user doesn't have a set for current week
     const response = await api.get("/user-weekly-vocabulary-set/latest");
-    console.log("[fetchUserSet] GET /latest succeeded:", response.data);
 
     if (response.data && response.data.items) {
       vocabularyItems.value = response.data.items.map((item) => ({
@@ -295,16 +292,7 @@ const fetchUserSet = async () => {
       ).toLocaleDateString();
     }
   } catch (err) {
-    console.log(
-      "[fetchUserSet] Error caught:",
-      err.response?.status,
-      err.message
-    );
-
     if (err.response?.status === 404) {
-      console.log(
-        "[fetchUserSet] Got 404 - user has no set yet, creating one..."
-      );
       // No user set exists, create one
       try {
         // BACKEND: This endpoint should already exist in user-weekly-vocabulary-set.controller.ts
@@ -313,9 +301,7 @@ const fetchUserSet = async () => {
         // - Extract userId from req.user.userId
         // - Creates user's copy of 6 items from global weekly set
         // - Service should check if user already has a set for current week
-        console.log("[fetchUserSet] Calling POST /user-weekly-vocabulary-set");
         const response = await api.post("/user-weekly-vocabulary-set");
-        console.log("[fetchUserSet] POST succeeded:", response.data);
 
         // Use the response directly instead of fetching again
         if (response.data && response.data.items) {
@@ -333,7 +319,6 @@ const fetchUserSet = async () => {
           ).toLocaleDateString();
         }
       } catch (createErr) {
-        console.error("[fetchUserSet] Failed to create set:", createErr);
         error.value =
           createErr.response?.data?.message ||
           "Failed to create your vocabulary set";
@@ -372,46 +357,21 @@ const saveProgress = async (item) => {
 
 // Watch for authentication changes
 watch(isAuthenticated, async (newValue, oldValue) => {
-  console.log(
-    "[VocabularyGenerator] Auth state changed - old:",
-    oldValue,
-    "new:",
-    newValue
-  );
-
   // User just logged in
   if (newValue && !oldValue) {
-    console.log(
-      "[VocabularyGenerator] User logged in - calling fetchUserSet()"
-    );
     await fetchUserSet();
   }
   // User just logged out
   else if (!newValue && oldValue) {
-    console.log(
-      "[VocabularyGenerator] User logged out - calling fetchGlobalSet()"
-    );
     await fetchGlobalSet();
   }
 });
 
 // Initial data fetch
 onMounted(async () => {
-  console.log(
-    "[VocabularyGenerator] onMounted - isAuthenticated:",
-    isAuthenticated.value
-  );
-  console.log("[VocabularyGenerator] onMounted - user:", authStore.user);
-  console.log(
-    "[VocabularyGenerator] onMounted - accessToken:",
-    authStore.accessToken ? "exists" : "null"
-  );
-
   if (isAuthenticated.value) {
-    console.log("[VocabularyGenerator] Calling fetchUserSet()");
     await fetchUserSet();
   } else {
-    console.log("[VocabularyGenerator] Calling fetchGlobalSet()");
     await fetchGlobalSet();
   }
 });
