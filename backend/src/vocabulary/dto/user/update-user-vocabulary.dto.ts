@@ -4,5 +4,5 @@ import { CreateUserVocabularyDto } from './create-user-vocabulary.dto';
 export class UpdateUserVocabularyDto extends PartialType(
   CreateUserVocabularyDto,
 ) {
-  isUsed: boolean;
+  isCompleted: boolean;
 }

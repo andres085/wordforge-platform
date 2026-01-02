@@ -142,9 +142,10 @@ export class UserWeeklyVocabularySetService {
 
     const updatedItems =
       await this.userVocabularyItemRepository.save(userVocabularyItems);
+
     const isSetComplete = updatedItems.every((item) => item.isCompleted);
 
-    if (isSetComplete) {
+    if (isSetComplete && userVocabularyItems.length === 6) {
       activeSet = await this.userWeeklyVocabularyRepository.save({
         ...updateWeeklyVocabularySetDto,
         completedAt: new Date(),
@@ -154,7 +155,7 @@ export class UserWeeklyVocabularySetService {
     }
 
     // Outputs the entire data
-    return { ...activeSet };
+    return { ...activeSet, items: updatedItems };
   }
 
   remove(id: number) {
