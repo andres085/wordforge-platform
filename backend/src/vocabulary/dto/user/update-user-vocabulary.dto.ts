@@ -1,8 +1,11 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateUserVocabularyDto } from './create-user-vocabulary.dto';
+import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
-export class UpdateUserVocabularyDto extends PartialType(
-  CreateUserVocabularyDto,
-) {
+export class UpdateUserVocabularyDto {
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+
+  @IsBoolean()
+  @IsNotEmpty()
   isCompleted: boolean;
 }

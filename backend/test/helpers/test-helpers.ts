@@ -1,17 +1,31 @@
 // test/helpers/test-helpers.ts
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { getWeek, getYear } from 'date-fns';
 import { DataSource } from 'typeorm';
-import { GlobalVocabularyItem } from '../../src/vocabulary/entities';
+import { User } from '../../src/user/entities/user.entity';
+import {
+  GlobalVocabularyItem,
+  UserVocabularyItem,
+} from '../../src/vocabulary/entities';
 import { VocabularyCategory } from '../../src/vocabulary/enums/vocabulary-item-category.enum';
-import { GlobalWeeklyVocabularySet } from '../../src/weekly-vocabulary-set/entities';
+import {
+  GlobalWeeklyVocabularySet,
+  UserWeeklyVocabularySet,
+} from '../../src/weekly-vocabulary-set/entities';
 
 export class TestHelpers {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
 
-  async createGlobalSetWithItems(
-    weekNumber: number = 1,
-    year: number = 2024,
-    itemCount: number = 6,
-  ): Promise<GlobalWeeklyVocabularySet> {
+  async createGlobalSetWithItems(): Promise<GlobalWeeklyVocabularySet> {
+    const now = new Date();
+    const weekNumber = getWeek(now);
+    const year = getYear(now);
+
     const setRepo = this.dataSource.getRepository(GlobalWeeklyVocabularySet);
     const itemRepo = this.dataSource.getRepository(GlobalVocabularyItem);
 
@@ -63,7 +77,7 @@ export class TestHelpers {
     ];
 
     const items: GlobalVocabularyItem[] = [];
-    for (let i = 0; i < itemCount; i++) {
+    for (let i = 0; i < 6; i++) {
       const dummyData = dummyItems[i % dummyItems.length];
 
       const item = itemRepo.create({
@@ -88,6 +102,117 @@ export class TestHelpers {
       where: { id: savedSet.id },
       relations: ['items'],
     })) as GlobalWeeklyVocabularySet;
+  }
+
+  async createUserSetWithItems(
+    userId: string,
+  ): Promise<UserWeeklyVocabularySet> {
+    const now = new Date();
+    const weekNumber = getWeek(now);
+    const year = getYear(now);
+
+    const setRepo = this.dataSource.getRepository(UserWeeklyVocabularySet);
+    const itemRepo = this.dataSource.getRepository(UserVocabularyItem);
+
+    const userSet = setRepo.create({
+      weekNumber,
+      year,
+      isActive: true,
+      userId,
+    });
+
+    const savedSet = await setRepo.save(userSet);
+
+    const dummyItems = [
+      {
+        category: VocabularyCategory.PHRASAL_VERBS,
+        term: 'come across',
+        definition: 'find by chance or seem/appear',
+        example: 'I came across an interesting article yesterday.',
+      },
+      {
+        category: VocabularyCategory.FIXED_EXPRESSIONS,
+        term: 'for the time being',
+        definition: 'temporarily, for now',
+        example: "For the time being, I'll work from home.",
+      },
+      {
+        category: VocabularyCategory.BINOMIALS,
+        term: 'pros and cons',
+        definition: 'advantages and disadvantages',
+        example: "Let's weigh the pros and cons before deciding.",
+      },
+      {
+        category: VocabularyCategory.PROVERBS,
+        term: 'Better late than never',
+        definition: "it's better to do something late than not at all",
+        example: 'I finally finished the book—better late than never!',
+      },
+      {
+        category: VocabularyCategory.DISCOURSE_MARKERS,
+        term: 'having said that',
+        definition: 'however, but (used to contrast with previous statement)',
+        example: 'The movie was long. Having said that, it was entertaining.',
+      },
+      {
+        category: VocabularyCategory.REGISTER_SPECIFIC,
+        term: 'get in touch',
+        definition: 'contact (neutral/informal)',
+        example: 'Feel free to get in touch if you have questions.',
+      },
+    ];
+
+    const items: UserVocabularyItem[] = [];
+    for (let i = 0; i < 6; i++) {
+      const dummyData = dummyItems[i % dummyItems.length];
+
+      const item = itemRepo.create({
+        position: i + 1,
+        category: dummyData.category,
+        term:
+          i >= 6
+            ? `${dummyData.term} ${Math.floor(i / 6) + 1}`
+            : dummyData.term,
+        definition: dummyData.definition,
+        example: dummyData.example,
+        weeklySetId: savedSet.id,
+        weeklySet: savedSet,
+      });
+
+      items.push(item);
+    }
+
+    await itemRepo.save(items);
+
+    return (await setRepo.findOne({
+      where: { id: savedSet.id },
+      relations: ['items'],
+    })) as UserWeeklyVocabularySet;
+  }
+
+  async createUser() {
+    const userRepo = this.dataSource.getRepository(User);
+
+    const createdUser = userRepo.create({
+      googleId: 'test:id',
+      email: 'user@gmail.com',
+      name: 'user',
+      avatar: 'avatar.jpg',
+    });
+
+    const storedUser = await userRepo.save(createdUser);
+
+    const payload = { email: createdUser.email, sub: createdUser.id };
+
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '7d',
+      secret: this.configService.get('JWT_SECRET'),
+    });
+
+    return {
+      storedUser,
+      accessToken,
+    };
   }
 
   async cleanDatabase(): Promise<void> {

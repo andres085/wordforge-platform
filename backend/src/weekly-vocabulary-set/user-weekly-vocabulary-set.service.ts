@@ -154,7 +154,6 @@ export class UserWeeklyVocabularySetService {
       });
     }
 
-    // Outputs the entire data
     return { ...activeSet, items: updatedItems };
   }
 
