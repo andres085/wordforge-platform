@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AiModule } from './ai/ai.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
@@ -12,7 +13,6 @@ import {
   UserWeeklyVocabularySet,
 } from './weekly-vocabulary-set/entities';
 import { WeeklyVocabularySetModule } from './weekly-vocabulary-set/weekly-vocabulary-set.module';
-import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
