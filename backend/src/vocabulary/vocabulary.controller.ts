@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
 import { UpdateGlobalVocabularyDto } from './dto/global/update-global-vocabulary.dto';
+import { UpdateUserVocabularyItemDto } from './dto/user/update-user-vocabulary-item.dto';
 import { VocabularyService } from './vocabulary.service';
 
 @Controller('vocabulary')
@@ -12,11 +13,8 @@ export class VocabularyController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateVocabularyDto: UpdateGlobalVocabularyDto,
-  ) {
-    return this.vocabularyService.update(id, updateVocabularyDto);
+  update(@Body() updateUserVocabularyItemDto: UpdateUserVocabularyItemDto) {
+    return this.vocabularyService.update(updateUserVocabularyItemDto);
   }
 
   @Patch('/status/:id')

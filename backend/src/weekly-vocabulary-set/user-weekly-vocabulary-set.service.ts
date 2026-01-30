@@ -6,10 +6,12 @@ import {
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { getWeek, getYear } from 'date-fns';
 import { DataSource, Repository } from 'typeorm';
+import { UpdateUserVocabularyItemDto } from '../vocabulary/dto/user/update-user-vocabulary-item.dto';
 import {
   GlobalVocabularyItem,
   UserVocabularyItem,
 } from '../vocabulary/entities';
+import { VocabularyService } from '../vocabulary/vocabulary.service';
 import { UpdateUserWeeklyVocabularySetDto } from './dto/user/update-user-weekly-vocabulary-set.dto';
 import { GlobalWeeklyVocabularySet, UserWeeklyVocabularySet } from './entities';
 import { UserWeeklyVocabularySetStatus } from './entities/user/user-weekly-vocabulary-set.entity';
@@ -25,6 +27,7 @@ export class UserWeeklyVocabularySetService {
     private userWeeklyVocabularyRepository: Repository<UserWeeklyVocabularySet>,
     @InjectRepository(UserVocabularyItem)
     private userVocabularyItemRepository: Repository<UserVocabularyItem>,
+    private readonly vocabularyService: VocabularyService,
   ) {}
 
   async findLatestGlobalSet() {
@@ -155,6 +158,12 @@ export class UserWeeklyVocabularySetService {
     }
 
     return { ...activeSet, items: updatedItems };
+  }
+
+  async rotateUserVocabularyItem(
+    updateUserVocabularyDto: UpdateUserVocabularyItemDto,
+  ) {
+    return await this.vocabularyService.update(updateUserVocabularyDto);
   }
 
   remove(id: number) {

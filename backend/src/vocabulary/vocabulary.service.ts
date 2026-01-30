@@ -6,16 +6,15 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AiService } from '../ai/ai.service';
-import { UpdateGlobalVocabularyDto } from './dto/global/update-global-vocabulary.dto';
+import { UpdateUserVocabularyItemDto } from './dto/user/update-user-vocabulary-item.dto';
 import { UserVocabularyItem } from './entities';
-import { GlobalVocabularyItem } from './entities/global/global-vocabulary-item.entity';
 
 @Injectable()
 export class VocabularyService {
   constructor(
     private readonly aiService: AiService,
-    @InjectRepository(GlobalVocabularyItem)
-    private vocabularyItemRepository: Repository<GlobalVocabularyItem>,
+    @InjectRepository(UserVocabularyItem)
+    private vocabularyItemRepository: Repository<UserVocabularyItem>,
   ) {}
 
   findAll() {
@@ -32,16 +31,19 @@ export class VocabularyService {
     return foundItem;
   }
 
-  async update(id: string, updateVocabularyDto: UpdateGlobalVocabularyDto) {
-    const foundItem = (await this.findOne(id)) as UserVocabularyItem;
+  async update(updateUserVocabularyDto: UpdateUserVocabularyItemDto) {
+    const foundItem = (await this.findOne(
+      updateUserVocabularyDto.id,
+    )) as UserVocabularyItem;
 
     if (foundItem.regenerationCount >= 3)
       throw new BadRequestException(
         "Can't generate more than three vocabulary items",
       );
 
-    const newVocabularyItem =
-      await this.aiService.generateVocabularyItem(updateVocabularyDto);
+    const newVocabularyItem = await this.aiService.generateVocabularyItem(
+      updateUserVocabularyDto,
+    );
 
     foundItem.category = newVocabularyItem.category;
     foundItem.term = newVocabularyItem.term;

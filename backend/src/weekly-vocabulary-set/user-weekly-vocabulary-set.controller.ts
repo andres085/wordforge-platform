@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { UpdateUserVocabularyItemDto } from '../vocabulary/dto/user/update-user-vocabulary-item.dto';
 import { UpdateUserWeeklyVocabularySetDto } from './dto/user/update-user-weekly-vocabulary-set.dto';
 import { UserWeeklyVocabularySetService } from './user-weekly-vocabulary-set.service';
 
@@ -41,6 +42,13 @@ export class UserWeeklyVocabularySetController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userWeeklyVocabularySetService.findOne(+id);
+  }
+
+  @Patch('/user-item')
+  updateItem(@Body() updateUserVocabularyItemDto: UpdateUserVocabularyItemDto) {
+    return this.userWeeklyVocabularySetService.rotateUserVocabularyItem(
+      updateUserVocabularyItemDto,
+    );
   }
 
   @Patch(':id')

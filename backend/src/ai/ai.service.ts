@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UpdateGlobalVocabularyDto } from '../vocabulary/dto/global/update-global-vocabulary.dto';
+import { UpdateUserVocabularyItemDto } from '../vocabulary/dto/user/update-user-vocabulary-item.dto';
 import { GlobalVocabularyItem } from '../vocabulary/entities';
 
 @Injectable()
@@ -160,12 +160,14 @@ export class AiService {
     return reorderedItems;
   }
 
-  async generateVocabularyItem(updateVocabularyDto: UpdateGlobalVocabularyDto) {
+  async generateVocabularyItem(
+    updateUserVocabularyItemDto: UpdateUserVocabularyItemDto,
+  ) {
     const prompt = `You are a vocabulary enrichment assistant. Generate a new English vocabulary item to update this one:
 
-      - ${updateVocabularyDto.category}
-      - ${updateVocabularyDto.term}
-      - ${updateVocabularyDto.definition}
+      - ${updateUserVocabularyItemDto.category}
+      - ${updateUserVocabularyItemDto.term}
+      - ${updateUserVocabularyItemDto.definition}
 
       Requirements:
       - It should be of the same category
@@ -175,7 +177,7 @@ export class AiService {
       - Avoid repetition of the previous vocabularyItem
       - Make examples natural and conversational
 
-      Return ONLY a valid JSON object with this exact structure:
+      IMPORTANT: RETURN ONLY THE JAVASCRIPT OBJECT, NO ADDITIONAL TEXT OR MARKDOWN TAGS LIKE THE JSON, OR JAVASCRIPT AT THE START JUST THE PLAIN OBJECT, AND FOLLOW THIS STRUCTURE:
 
         {
           "category": "Phrasal verbs",
@@ -183,8 +185,7 @@ export class AiService {
           "definition": "eagerly anticipate",
           "example": "I'm really looking forward to my vacation next month."
         }
-
-      Return ONLY the JSON object, no additional text or markdown like the json tag at the start.`;
+      `;
 
     const response = await this.genAI.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -195,7 +196,7 @@ export class AiService {
       throw new InternalServerErrorException('Failed to get question from AI');
 
     try {
-      const parsedResponse = JSON.parse(response.text as string);
+      const parsedResponse = JSON.parse(response.text);
 
       return parsedResponse;
     } catch (error) {
