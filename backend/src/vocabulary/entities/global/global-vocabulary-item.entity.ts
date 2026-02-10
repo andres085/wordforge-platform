@@ -38,7 +38,7 @@ export class GlobalVocabularyItem {
 
   @ManyToOne(() => GlobalWeeklyVocabularySet, (weeklySet) => weeklySet.items, {
     onDelete: 'CASCADE',
-    nullable: false,
+    nullable: true,
   })
   @JoinColumn({ name: 'weekly_set_id' })
   weeklySet: GlobalWeeklyVocabularySet;

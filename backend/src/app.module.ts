@@ -7,6 +7,7 @@ import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
 import { UserVocabularyItem } from './vocabulary/entities';
 import { GlobalVocabularyItem } from './vocabulary/entities/global/global-vocabulary-item.entity';
+import { SeedVocabularyItem } from './vocabulary/entities/seed/seed-vocabulary-item.entity';
 import { VocabularyModule } from './vocabulary/vocabulary.module';
 import {
   GlobalWeeklyVocabularySet,
@@ -40,6 +41,7 @@ import { WeeklyVocabularySetModule } from './weekly-vocabulary-set/weekly-vocabu
           GlobalWeeklyVocabularySet,
           UserWeeklyVocabularySet,
           User,
+          SeedVocabularyItem,
         ],
         synchronize: configService.get('DB_SYNC', true),
       }),
