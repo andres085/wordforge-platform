@@ -2,15 +2,15 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { getWeek, getYear } from 'date-fns';
 import { DataSource, Repository } from 'typeorm';
-import { AiService } from '../ai/ai.service';
 import { GlobalVocabularyItem } from '../vocabulary/entities/global/global-vocabulary-item.entity';
+import { VocabularyService } from '../vocabulary/vocabulary.service';
 import { UpdateGlobalWeeklyVocabularySetDto } from './dto/global/update-global-weekly-vocabulary-set.dto';
 import { GlobalWeeklyVocabularySet } from './entities';
 
 @Injectable()
 export class GlobalWeeklyVocabularySetService {
   constructor(
-    private readonly aiService: AiService,
+    private readonly vocabularyItemService: VocabularyService,
     @InjectDataSource()
     private readonly dataSource: DataSource,
     @InjectRepository(GlobalVocabularyItem)
@@ -27,14 +27,15 @@ export class GlobalWeeklyVocabularySetService {
     try {
       return await this.dataSource.manager.transaction(
         async (transactionalEntityManager) => {
-          const vocabularyResponse = await this.aiService.generateVocabulary();
+          const vocabularyItemSetResponse =
+            await this.vocabularyItemService.findRandomItemSetFromSeed();
 
           const createdWeeklyVocabulary = await transactionalEntityManager.save(
             GlobalWeeklyVocabularySet,
             { weekNumber, year },
           );
 
-          const vocabularyItemsToCreate = vocabularyResponse.map(
+          const vocabularyItemsToCreate = vocabularyItemSetResponse.map(
             (vocabularyItem: GlobalVocabularyItem) => ({
               ...vocabularyItem,
               weeklySetId: createdWeeklyVocabulary.id,
