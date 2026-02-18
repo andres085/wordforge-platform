@@ -9,6 +9,7 @@ import { AiService } from '../ai/ai.service';
 import { UpdateGlobalVocabularyDto } from './dto/global/update-global-vocabulary.dto';
 import { UserVocabularyItem } from './entities';
 import { GlobalVocabularyItem } from './entities/global/global-vocabulary-item.entity';
+import { SeedVocabularyItem } from './entities/seed/seed-vocabulary-item.entity';
 
 @Injectable()
 export class VocabularyService {
@@ -16,10 +17,16 @@ export class VocabularyService {
     private readonly aiService: AiService,
     @InjectRepository(GlobalVocabularyItem)
     private vocabularyItemRepository: Repository<GlobalVocabularyItem>,
+    @InjectRepository(SeedVocabularyItem)
+    private seedVocabularyItem: Repository<SeedVocabularyItem>,
   ) {}
 
-  findAll() {
-    return `This action returns all vocabulary`;
+  async findRandomItemSetFromSeed() {
+    return await this.seedVocabularyItem
+      .createQueryBuilder('seed_vocabulary_item')
+      .select('DISTINCT ON(seed_vocabulary_item.category) *')
+      .orderBy('category, RANDOM()')
+      .getRawMany();
   }
 
   async findOne(id: string) {
