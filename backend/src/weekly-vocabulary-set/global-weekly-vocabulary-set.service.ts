@@ -3,18 +3,16 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { getWeek, getYear } from 'date-fns';
 import { DataSource, Repository } from 'typeorm';
 import { GlobalVocabularyItem } from '../vocabulary/entities/global/global-vocabulary-item.entity';
-import { VocabularyService } from '../vocabulary/vocabulary.service';
+import { SeedVocabularyItemService } from '../vocabulary/seed-vocabulary-item.service';
 import { UpdateGlobalWeeklyVocabularySetDto } from './dto/global/update-global-weekly-vocabulary-set.dto';
 import { GlobalWeeklyVocabularySet } from './entities';
 
 @Injectable()
 export class GlobalWeeklyVocabularySetService {
   constructor(
-    private readonly vocabularyItemService: VocabularyService,
+    private readonly seedVocabularyItemService: SeedVocabularyItemService,
     @InjectDataSource()
     private readonly dataSource: DataSource,
-    @InjectRepository(GlobalVocabularyItem)
-    private readonly globalVocabularyItemRepository: Repository<GlobalVocabularyItem>,
     @InjectRepository(GlobalWeeklyVocabularySet)
     private readonly globalWeeklyVocabularyRepository: Repository<GlobalWeeklyVocabularySet>,
   ) {}
@@ -28,7 +26,7 @@ export class GlobalWeeklyVocabularySetService {
       return await this.dataSource.manager.transaction(
         async (transactionalEntityManager) => {
           const vocabularyItemSetResponse =
-            await this.vocabularyItemService.findRandomItemSetFromSeed();
+            await this.seedVocabularyItemService.findRandomItemSetFromSeed();
 
           const createdWeeklyVocabulary = await transactionalEntityManager.save(
             GlobalWeeklyVocabularySet,
