@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { UpdateUserVocabularyDto } from './dto';
 import { SeedVocabularyItem } from './entities/seed/seed-vocabulary-item.entity';
 
@@ -17,6 +17,20 @@ export class SeedVocabularyItemService {
       .select('DISTINCT ON(seed_vocabulary_item.category) *')
       .orderBy('category, RANDOM()')
       .getRawMany();
+  }
+
+  async findRandomItemFromSeed(searchCondition: {
+    position: number;
+    term: string;
+    definition: string;
+  }) {
+    return await this.seedVocabularyItemRepository.findOne({
+      where: {
+        position: searchCondition.position,
+        term: Not(searchCondition.term),
+        definition: Not(searchCondition.definition),
+      },
+    });
   }
 
   async generateVocabularyItemFromSeed(

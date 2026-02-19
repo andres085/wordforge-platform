@@ -11,7 +11,7 @@ import {
   UserVocabularyItem,
 } from '../vocabulary/entities';
 import { UpdateUserWeeklyVocabularySetDto } from './dto/user/update-user-weekly-vocabulary-set.dto';
-import { GlobalWeeklyVocabularySet, UserWeeklyVocabularySet } from './entities';
+import { UserWeeklyVocabularySet } from './entities';
 import { UserWeeklyVocabularySetStatus } from './entities/user/user-weekly-vocabulary-set.entity';
 import { GlobalWeeklyVocabularySetService } from './global-weekly-vocabulary-set.service';
 
@@ -21,12 +21,10 @@ export class UserWeeklyVocabularySetService {
     private readonly globalWeeklyVocabularySetService: GlobalWeeklyVocabularySetService,
     @InjectDataSource()
     private readonly dataSource: DataSource,
-    @InjectRepository(GlobalWeeklyVocabularySet)
-    private globalWeeklyVocabularyRepository: Repository<GlobalWeeklyVocabularySet>,
     @InjectRepository(UserWeeklyVocabularySet)
-    private userWeeklyVocabularyRepository: Repository<UserWeeklyVocabularySet>,
+    private readonly userWeeklyVocabularyRepository: Repository<UserWeeklyVocabularySet>,
     @InjectRepository(UserVocabularyItem)
-    private userVocabularyItemRepository: Repository<UserVocabularyItem>,
+    private readonly userVocabularyItemRepository: Repository<UserVocabularyItem>,
   ) {}
 
   async create(userId: string) {

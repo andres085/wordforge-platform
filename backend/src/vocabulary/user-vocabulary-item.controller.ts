@@ -22,6 +22,15 @@ export class VocabularyController {
     return this.userVocabularyItemService.update(id, updateVocabularyDto);
   }
 
+  @Patch('/item/:vocabularyItemId')
+  updateUserVocabularyItem(
+    @Param('vocabularyItemId') vocabularyItemId: string,
+  ) {
+    return this.userVocabularyItemService.updateUserVocabularyItem(
+      vocabularyItemId,
+    );
+  }
+
   @Patch('/status/:id')
   updateStatus(
     @Param('id') id: string,

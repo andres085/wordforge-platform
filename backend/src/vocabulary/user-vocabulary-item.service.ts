@@ -7,14 +7,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateUserVocabularyDto } from './dto';
 import { UserVocabularyItem } from './entities';
-import { GlobalVocabularyItem } from './entities/global/global-vocabulary-item.entity';
 import { SeedVocabularyItemService } from './seed-vocabulary-item.service';
 
 @Injectable()
 export class UserVocabularyItemService {
   constructor(
     @InjectRepository(UserVocabularyItem)
-    private userVocabularyItemRepository: Repository<GlobalVocabularyItem>,
+    private userVocabularyItemRepository: Repository<UserVocabularyItem>,
     private readonly seedVocabularyItemService: SeedVocabularyItemService,
   ) {}
 
@@ -61,5 +60,30 @@ export class UserVocabularyItemService {
     }
 
     return await this.userVocabularyItemRepository.save(foundItem);
+  }
+
+  async updateUserVocabularyItem(userVocabularyItemId: string) {
+    const foundUserVocabularyItem = await this.findOne(userVocabularyItemId);
+
+    const searchCondition = {
+      position: foundUserVocabularyItem.position,
+      term: foundUserVocabularyItem.term,
+      definition: foundUserVocabularyItem.definition,
+    };
+
+    const foundNewSeedItem =
+      await this.seedVocabularyItemService.findRandomItemFromSeed(
+        searchCondition,
+      );
+
+    if (!foundNewSeedItem) throw new NotFoundException(`Seed item Not found`);
+
+    foundUserVocabularyItem.term = foundNewSeedItem.term;
+    foundUserVocabularyItem.definition = foundNewSeedItem.definition;
+    foundUserVocabularyItem.example = foundNewSeedItem.example;
+
+    return await this.userVocabularyItemRepository.save(
+      foundUserVocabularyItem,
+    );
   }
 }
