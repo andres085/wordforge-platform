@@ -1,4 +1,6 @@
 import { INestApplication } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getWeek } from 'date-fns';
 import * as request from 'supertest';
@@ -12,6 +14,8 @@ describe('GlobalWeeklyVocabularySet API (Integration)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let helpers: TestHelpers;
+  let jwtService: JwtService;
+  let configService: ConfigService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -25,7 +29,9 @@ describe('GlobalWeeklyVocabularySet API (Integration)', () => {
     await app.init();
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
-    helpers = new TestHelpers(dataSource);
+    jwtService = moduleFixture.get<JwtService>(JwtService);
+    configService = moduleFixture.get<ConfigService>(ConfigService);
+    helpers = new TestHelpers(dataSource, jwtService, configService);
   });
 
   afterAll(async () => {
@@ -39,6 +45,8 @@ describe('GlobalWeeklyVocabularySet API (Integration)', () => {
 
   describe('POST /global-weekly-vocabulary-set', () => {
     it('should return 200 and create a new weekly set with the correct type of values and total of items', async () => {
+      await helpers.generateSeedVocabularyItems();
+
       const response = await request(app.getHttpServer())
         .get('/global-weekly-vocabulary-set')
         .expect(200);
@@ -54,11 +62,8 @@ describe('GlobalWeeklyVocabularySet API (Integration)', () => {
     it('should return 200 and the latest published set with 6 items', async () => {
       const now = new Date();
       const weekNumber = getWeek(now);
-      const latestSet = await helpers.createGlobalSetWithItems(
-        weekNumber,
-        2025,
-        6,
-      );
+      const latestSet = await helpers.createGlobalSetWithItems();
+      const actualYear = now.getFullYear();
 
       const response = await request(app.getHttpServer())
         .get('/global-weekly-vocabulary-set/latest')
@@ -66,7 +71,7 @@ describe('GlobalWeeklyVocabularySet API (Integration)', () => {
 
       expect(response.body.id).toBe(latestSet.id);
       expect(response.body.weekNumber).toBe(weekNumber);
-      expect(response.body.year).toBe(2025);
+      expect(response.body.year).toBe(actualYear);
       expect(response.body.items[0]).toMatchObject({
         position: expect.any(Number),
         category: expect.any(String),
