@@ -8,6 +8,7 @@ import {
   GlobalVocabularyItem,
   UserVocabularyItem,
 } from '../../src/vocabulary/entities';
+import { SeedVocabularyItem } from '../../src/vocabulary/entities/seed/seed-vocabulary-item.entity';
 import { VocabularyCategory } from '../../src/vocabulary/enums/vocabulary-item-category.enum';
 import {
   GlobalWeeklyVocabularySet,
@@ -213,6 +214,60 @@ export class TestHelpers {
       storedUser,
       accessToken,
     };
+  }
+
+  async generateSeedVocabularyItems() {
+    const dataSeed = [
+      {
+        position: 1,
+        category: 'Phrasal verbs',
+        term: 'look forward to',
+        definition: 'eagerly anticipate',
+        example: "I'm really looking forward to my vacation next month.",
+      },
+      {
+        position: 2,
+        category: 'Fixed expressions',
+        term: 'out of the blue',
+        definition: 'suddenly and unexpectedly',
+        example: 'My old friend called me out of the blue last night.',
+      },
+      {
+        position: 3,
+        category: 'Binomials',
+        term: 'black and white',
+        definition: 'clear and simple, without nuance',
+        example: "The issue isn't as black and white as you think it is.",
+      },
+      {
+        position: 4,
+        category: 'Proverbs/sayings',
+        term: 'a bird in the hand is worth two in the bush',
+        definition:
+          "it's better to keep what you have than risk it for something better",
+        example:
+          'I know the other job pays more, but a bird in the hand is worth two in the bush.',
+      },
+      {
+        position: 5,
+        category: 'Discourse markers',
+        term: 'at the end of the day',
+        definition: 'ultimately or in conclusion',
+        example: "At the end of the day, we all want what's best for the team.",
+      },
+      {
+        position: 6,
+        category: 'Register-specific vocabulary',
+        term: 'ascertain',
+        definition: 'find out or determine (formal)',
+        example: 'We need to ascertain the facts before making a decision.',
+      },
+    ];
+
+    const seedDataRepo = this.dataSource.getRepository(SeedVocabularyItem);
+    const createdSeeds = seedDataRepo.create(dataSeed);
+
+    return await seedDataRepo.save(createdSeeds);
   }
 
   async cleanDatabase(): Promise<void> {
