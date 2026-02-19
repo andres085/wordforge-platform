@@ -4,7 +4,6 @@ import { getWeek, getYear } from 'date-fns';
 import { DataSource, Repository } from 'typeorm';
 import { GlobalVocabularyItem } from '../vocabulary/entities/global/global-vocabulary-item.entity';
 import { SeedVocabularyItemService } from '../vocabulary/seed-vocabulary-item.service';
-import { UpdateGlobalWeeklyVocabularySetDto } from './dto/global/update-global-weekly-vocabulary-set.dto';
 import { GlobalWeeklyVocabularySet } from './entities';
 
 @Injectable()
@@ -72,24 +71,5 @@ export class GlobalWeeklyVocabularySetService {
         year,
       },
     });
-  }
-
-  findAll() {
-    return `This action returns all weeklyVocabularySet`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} weeklyVocabularySet`;
-  }
-
-  update(
-    id: number,
-    updateWeeklyVocabularySetDto: UpdateGlobalWeeklyVocabularySetDto,
-  ) {
-    return `This action updates a #${id} weeklyVocabularySet`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} weeklyVocabularySet`;
   }
 }

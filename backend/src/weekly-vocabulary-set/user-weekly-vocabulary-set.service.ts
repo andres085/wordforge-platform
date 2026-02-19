@@ -13,10 +13,12 @@ import {
 import { UpdateUserWeeklyVocabularySetDto } from './dto/user/update-user-weekly-vocabulary-set.dto';
 import { GlobalWeeklyVocabularySet, UserWeeklyVocabularySet } from './entities';
 import { UserWeeklyVocabularySetStatus } from './entities/user/user-weekly-vocabulary-set.entity';
+import { GlobalWeeklyVocabularySetService } from './global-weekly-vocabulary-set.service';
 
 @Injectable()
 export class UserWeeklyVocabularySetService {
   constructor(
+    private readonly globalWeeklyVocabularySetService: GlobalWeeklyVocabularySetService,
     @InjectDataSource()
     private readonly dataSource: DataSource,
     @InjectRepository(GlobalWeeklyVocabularySet)
@@ -27,19 +29,6 @@ export class UserWeeklyVocabularySetService {
     private userVocabularyItemRepository: Repository<UserVocabularyItem>,
   ) {}
 
-  async findLatestGlobalSet() {
-    const now = new Date();
-    const weekNumber = getWeek(now);
-    const year = getYear(now);
-
-    return await this.globalWeeklyVocabularyRepository.findOne({
-      where: {
-        weekNumber,
-        year,
-      },
-    });
-  }
-
   async create(userId: string) {
     return await this.dataSource.manager.transaction(
       async (transactionalEntityManager) => {
@@ -49,7 +38,8 @@ export class UserWeeklyVocabularySetService {
             "Can't generate a new set without completing the current one",
           );
 
-        const latestGlobalSet = await this.findLatestGlobalSet();
+        const latestGlobalSet =
+          await this.globalWeeklyVocabularySetService.findLatestSet();
 
         if (!latestGlobalSet)
           throw new NotFoundException('No active global set found');
