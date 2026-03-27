@@ -48,7 +48,7 @@ export class UserWeeklyVocabularySetController {
     @Param('id') id: string,
     @Body() updateWeeklyVocabularySetDto: UpdateUserWeeklyVocabularySetDto,
   ) {
-    return this.userWeeklyVocabularySetService.update(
+    return this.userWeeklyVocabularySetService.updateStatus(
       id,
       updateWeeklyVocabularySetDto,
     );

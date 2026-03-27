@@ -110,7 +110,7 @@ export class UserWeeklyVocabularySetService {
     return `This action returns a #${id} weeklyVocabularySet`;
   }
 
-  async update(
+  async updateStatus(
     id: string,
     updateWeeklyVocabularySetDto: UpdateUserWeeklyVocabularySetDto,
   ) {

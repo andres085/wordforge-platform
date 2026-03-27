@@ -57,7 +57,7 @@ describe('GlobalWeeklyVocabularySet API (Integration)', () => {
       expect(body.items.length).toEqual(6);
     });
 
-    it('should create a user set', async () => {
+    it('should create a user set from a global set', async () => {
       const { accessToken } = await helpers.createUser();
       await helpers.createGlobalSetWithItems();
 
@@ -85,6 +85,23 @@ describe('GlobalWeeklyVocabularySet API (Integration)', () => {
         "Can't generate a new set without completing the current one",
       );
       expect(body.statusCode).toEqual(400);
+    });
+
+    it('should change the status of a set of items', async () => {
+      const { storedUser, accessToken } = await helpers.createUser();
+      const { items } = await helpers.createUserSetWithItems(storedUser.id);
+
+      console.log(items);
+      //   const response = await request(app.getHttpServer())
+      //     .post('/user-weekly-vocabulary-set')
+      //     .set('Authorization', `Bearer ${accessToken}`);
+
+      //   const body = response.body;
+
+      //   expect(body.message).toBe(
+      //     "Can't generate a new set without completing the current one",
+      //   );
+      //   expect(body.statusCode).toEqual(400);
     });
   });
 });

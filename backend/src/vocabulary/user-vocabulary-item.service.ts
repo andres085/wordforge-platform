@@ -50,7 +50,7 @@ export class UserVocabularyItemService {
   }
 
   async updateStatus(id: string, status: boolean) {
-    const foundItem = (await this.findOne(id)) as UserVocabularyItem;
+    const foundItem = await this.findOne(id);
 
     foundItem.isCompleted = status;
     if (status) {
